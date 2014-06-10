@@ -1,0 +1,1 @@
+﻿SELECT Exe, Installer, VersionName FROM Products INNER JOIN Versions ON Products.ProductId = Versions.ProductId INNER JOIN Archives ON Versions.VersionId = Archives.VersionId WHERE Products.ProductName = 'TextPad'

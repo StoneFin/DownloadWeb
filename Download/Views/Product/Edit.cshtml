@@ -1,0 +1,87 @@
+﻿@model Download.Models.Product
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal" style="background-color: #ffffff; border: 2px solid #4f51d0; ">
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.ProductId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProductName)
+                @Html.ValidationMessageFor(model => model.ProductName)
+            </div>
+        </div>
+        <table class="table table-hover" style="background-color: #ffffff;">
+
+            <tr>
+                <th>
+                    @Html.Encode("Version")
+                </th>
+                <th>
+                    @Html.Encode("Installer")
+                </th>
+                <th>
+                    @Html.Encode(".exe")
+                </th>
+                <th>
+                    @Html.Encode("ReadMe")
+                </th>
+                </tr>
+@foreach (var version in Model.Versions)
+{
+
+                 <tr> 
+                     <td>  
+                     @version.VersionName
+                     </td>        
+                @foreach (var arch in version.Archives)
+                {
+                    <td>
+                        @arch.Installer
+                    </td>
+                    <td>
+                        @arch.Exe
+                    </td>
+                    <td>
+                        @arch.ReadMe
+                    </td>
+                }
+                <td>
+                    @Html.ActionLink("Edit", "EditVersion", new { id = version.VersionId }) |
+                    @Html.ActionLink("Delete", "DeleteVersion", new { id = version.VersionId })
+                </td>
+                </tr>
+                    
+                }
+
+        </table>
+        <div class="col-md-2">
+            <p class="tab"> @Html.ActionLink("Add Version", "AddVersion", new { id = Model.ProductId })</p>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+
+        </div>
+     </div>
+}
+
+<div >
+    <p class="tab">@Html.ActionLink("Back to List", "Index")</p>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,100 @@
+﻿@model Download.Models.Version
+
+@{
+    ViewBag.Title = "EditVersion";
+}
+
+<h2>Edit Version</h2>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    @using (Html.BeginForm("EditVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.VersionId);
+
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.VersionName, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.VersionName)
+                    @Html.ValidationMessageFor(model => model.VersionName)
+                </div>
+            </div>
+            <hr />
+            @Html.ValidationSummary(true)
+        </div>
+        foreach (var arch in Model.Archives) { 
+        <div class="form-group">
+            <fieldset>
+                <div>
+                    @if (arch.Exe != null)
+                    {
+                    <p>
+                        @arch.Exe <input type="file" name="FileUpload1" />
+                    </p>
+                    }
+                    else { 
+                    <p>
+                        Select an .exe: <input type="file" name="FileUpload1" />
+                    </p>
+                    }
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <fieldset>
+                <div>
+                    @if (arch.Installer != null)
+                    {
+                    <p>
+                         @arch.Installer <input type="file" name="FileUpload2" />
+                    </p>
+                    }
+                    else
+                    {
+                    <p>
+                        Select an Installer: <input type="file" name="FileUpload2" />
+                   </p>
+                    }
+                </div>
+            </fieldset>
+
+        </div>
+
+        <div class="form-group">
+            <fieldset>
+                <div>
+
+                    @if (arch.ReadMe != null)
+                    {
+                    <p>
+                        @arch.ReadMe <input type="file" name="FileUpload2" />
+                    </p>
+                    }
+                    else
+                    {
+                     <p>
+                          Select a ReadMe: <input type="file" name="FileUpload2" />
+                    </p>
+                    }
+                </div>
+            </fieldset>
+        </div>
+        }
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save Changes" class="btn btn-default" /><br />
+            </div>
+            @Html.ActionLink("Back to Versions", "Edit", new {id = Model.ProductId })
+        </div>
+
+    }
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }

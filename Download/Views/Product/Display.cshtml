@@ -1,0 +1,110 @@
+﻿@model Download.Models.ProductDisplayView
+@using MarkdownDeep;
+@{
+    ViewBag.Title = "Display";
+    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString();
+    var path = ViewData["ReadMe"];
+    int i = 0;
+    var file = ViewData["Content"];
+}
+
+<h2>@Model.ProductName</h2>
+
+<div style="background-color: rgba(255, 255, 255, 0.35); border: 2px solid #ffffff" class="body-content">
+    <hr />
+    <h3>Read Me</h3>
+    <div class="col-md-12">
+
+        @*Display the Markdown readme that was converted to html*@
+        @Html.Raw(file)
+       </div>
+
+    <dl class="dl-horizontal">
+        @foreach (var version in Model.Versions)
+        {
+            <dt>
+                @Html.DisplayNameFor(model => version.VersionName)
+            </dt>
+             <dd>
+                @Html.Encode(version.VersionName)
+            </dd>
+            break;
+        }
+    </dl>
+    @foreach (var date in Model.Versions) { 
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.Encode("Date Uploaded")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => date.DateCreated)
+        </dd>
+    </dl>
+        break;
+    }
+
+    <div class="md-col-2">
+        @foreach (var version in Model.Versions)
+        {
+            foreach (var arch in version.Archives)
+            {
+                if (arch.Installer != null)
+                {
+                     @Html.DisplayFor(model => arch.Installer)
+                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, extension = "\\" + Model.ProductName.ToString() + "\\" }))
+                {
+                            <input type="submit" value= "Download Installer" class="btn btn-primary" />
+                }
+                        @ViewBag.Message
+                }
+            }
+            break;
+        }
+    </div>
+    <div class="md-col-2" >
+        @foreach (var version in Model.Versions)
+        {
+            foreach (var arch in version.Archives)
+            {
+                if (arch.Exe != null)
+                {
+                     @Html.DisplayFor(model => arch.Exe)
+                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, extension = "\\" + Model.ProductName.ToString() + "\\" }))
+                {
+                        <input type="submit" value= "Download Exe" class="btn btn-primary" />
+                }
+                        @ViewBag.Message
+                }
+            }
+            break;
+        }
+    </div>
+        <div>
+            <h4>Archived Versions</h4>
+            <div>
+                <table>
+                    @foreach (var version in Model.Versions)
+                    {
+                        //Skip the first version becuase it is being displayed
+                        if (i == 0)
+                        {
+                            i++;
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    @*table of archived versions for this product*@
+                                    @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId })
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+<br />
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

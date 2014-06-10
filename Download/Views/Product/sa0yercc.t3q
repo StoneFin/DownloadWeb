@@ -1,0 +1,117 @@
+﻿@model Download.Models.ProductDisplayView
+@using MarkdownDeep;
+@{
+    ViewBag.Title = "Display";
+    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString();
+    var path = ViewData["ReadMe"];
+    int i = 0;
+    var file = ViewData["Content"];
+}
+
+<h2>@Model.ProductName</h2>
+
+<div style="background-color: rgba(255, 255, 255, 0.35)" class="body-content">
+    <hr />
+    <h3>Read Me</h3>
+    <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    </asp:Content>
+    <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+        @Html.Raw(file)
+    </asp:Content>
+       
+    <dl class="dl-horizontal">
+        @foreach (var version in Model.Versions)
+        {
+
+            <dt>
+                @Html.DisplayNameFor(model => version.VersionName)
+            </dt>
+             <dd>
+                @Html.Encode(version.VersionName)
+            </dd>
+            break;
+        }
+        
+
+
+
+    </dl>
+    @foreach (var date in Model.Versions) { 
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.Encode("Date Uploaded")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => date.DateCreated)
+        </dd>
+    </dl>
+        break;
+    }
+    <div class="col-md-3">
+        @foreach (var version in Model.Versions)
+        {
+            foreach (var arch in version.Archives)
+            {
+                if (arch.Installer != null)
+                {
+                    <div>
+                        @Html.DisplayNameFor(model => arch.Installer)
+
+                        @Html.ActionLink(arch.Installer, "Download", new { fileName = arch.Installer, id = Model.Id, extension = "\\Installer" })
+                        @ViewBag.Message
+                    </div>
+                }
+            }
+            break;
+
+        }
+
+
+
+    </div>
+    <div class="col-md-3 col-md-offset-9">
+        @foreach (var version in Model.Versions)
+        {
+            foreach (var arch in version.Archives)
+            {
+                if (arch.Exe != null)
+                {
+                    <div>
+                        @Html.DisplayNameFor(model => arch.Exe) :
+
+
+                        @Html.ActionLink(arch.Exe, "Download", new { fileName = arch.Exe, id = Model.Id, extension = "\\exe" })
+                        @ViewBag.Message
+                    </div>
+
+                }
+            }
+            break;
+
+        }
+
+
+
+    </div>
+
+</div>
+<div class="col-md-12">
+    <h4>Other Versions</h4>
+
+    <div>
+        @foreach (var version in Model.Versions)
+        {
+            if (i == 0)
+            {
+                i++;
+            }
+            else
+            {
+                @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId })<br />
+            }
+        }
+    </div>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

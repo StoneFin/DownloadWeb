@@ -1,0 +1,60 @@
+﻿@model Download.Models.AddVersionView
+
+
+@{
+    ViewBag.Title = "AddVersion";
+}
+
+
+<h2>Add Version</h2>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    @using (Html.BeginForm("AddVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <h4>@Model.ProductName</h4>
+            <hr />
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.ProductId) 
+        </div>
+        <div class="form-group">
+                <fieldset>
+                    <div>
+                        <p>
+                            Select an .exe: <input type="file" name="FileUpload1" />
+                        </p>
+                    </div>
+                </fieldset>
+            </div>
+        <div class="form-group">
+            <fieldset>
+                <div>
+                    <p>
+                        Select an Installer: <input type="file" name="FileUpload2" />
+                    </p>
+                </div>
+            </fieldset>
+
+        </div>
+
+        <div class="form-group">
+            <fieldset>
+                <div>
+                    <p>
+                        Select a ReadMe: <input type="file" name="FileUpload3" />
+                    </p>
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add Version" class="btn btn-default" /><br />
+            </div>
+        </div>
+
+    }

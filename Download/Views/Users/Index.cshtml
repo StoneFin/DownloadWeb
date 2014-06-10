@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Download.Models.UserViewModel>
+@using Download.Models;
+
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>All Users</h2>
+
+<table class="table table-hover" style="background-color: #ffffff; border: 2px solid #4547ae">
+    <tr style="border: 2px solid #4f51d0">
+        <th>
+            @Html.Encode("User Name")
+        </th>
+        <th>
+            @Html.Encode("Role")
+        </th>
+        <th>
+            @Html.Encode("Email")
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+
+                @foreach (var Role in item.roleNames)
+                {
+                    if (Role == "admin") { 
+                    <td style="background-color: rgba(255, 0, 0, 0.50)">
+                        @Role <br />
+                    </td>
+                    }
+                    else if (Role == "member") { 
+                    <td style="background-color: rgba(255, 141, 0, 0.50)">
+                        @Role <br />
+                    </td>
+                    }
+                    else { 
+                    <td style="background-color: rgba(182, 255, 0, 0.50)">
+                        @Role <br />
+                    </td>
+                }
+                }
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+           <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+               @Html.ActionLink("Delete", "Delete", new { id = item.Id}) 
+            </td> 
+        </tr>
+    }
+</table>

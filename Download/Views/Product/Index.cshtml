@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Download.Models.ProductListView>
+@using Download.Models
+
+@{
+    ViewBag.Title = "Index";
+
+}
+<div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
+    <h2>Index</h2>
+    <p>
+        @if (User.IsInRole("admin"))
+        {
+            @Html.ActionLink("Create New", "Create")
+        }
+        @using (Html.BeginForm())
+        {
+        <p>
+            <b>Search Products: </b><input id="SearchString" name="SearchString" type="text" value="" class="btn btn-default" autocomplete="on" style="text-align: left; ">
+            <input type="submit" value="Search" class="btn btn-info" />
+        </p>
+        }
+    </p>
+        <table class="table table-hover" style="background-color: #ffffff; border: 2px solid #ffffff" >
+
+            <tr>
+                <th >
+                    <strong>@Html.DisplayNameFor(model => model.ProductName)</strong>
+                </th>
+                <th>
+                </th>
+                @if (User.IsInRole("admin") == true) 
+                { 
+                <th>
+                </th>
+                }
+           </tr>
+
+            @foreach (var item in Model)
+            {
+                using (Html.BeginForm("Display", "Product", new { id = item.Id }))
+                {
+
+                    <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
+                        <td style="font-size: larger; font-style: initial">
+                            @item.ProductName
+                        </td>
+                        <td>
+                            <input type="submit" value="Download" class="btn btn-primary" />
+                        </td>
+                        @if (User.IsInRole("admin") == true) 
+                        { 
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                        </td>
+                        }
+                    </tr>
+                }
+
+            }
+
+        </table>
+    <br />
+    </div>

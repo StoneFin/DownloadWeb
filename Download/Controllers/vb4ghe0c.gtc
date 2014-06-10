@@ -1,0 +1,305 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Web.Mvc;
+using Download.Models;
+using System.IO;
+
+namespace Download.Controllers
+{
+    public class ProductController : Controller
+    {
+        
+
+        // GET: /Product/
+        public ActionResult Index(string searchString)
+        {
+            List<ProductListView> AllProducts = new List<ProductListView>();
+
+            List<Product> products;
+            using (var db = new ProductDBContext())
+            {
+                var Sproducts = from p in db.Products
+                                select p;
+                if (!String.IsNullOrEmpty(searchString))
+                {
+                    Sproducts = Sproducts.Where(s => s.ProductName.Contains(searchString));
+                    products = Sproducts.ToList();
+                }
+                else
+                {
+                    products = db.Products.ToList();
+                }
+
+               if (products.Count() == 0)
+               {
+                   return View(AllProducts);
+               }
+               var firstProduct = db.Products.First();
+               var firstArch = db.Archives.ToList();
+               var firstVersion = db.Versions.ToList();
+
+
+                foreach (var Product in products)
+                {
+                    ProductListView ProductModel = new ProductListView();
+                    ProductModel.ProductName = Product.ProductName;
+                    ProductModel.Id = Product.ProductId;
+
+                    foreach (var version in Product.Versions)
+                    {
+                        ProductModel.VersionName.Add(version.VersionName);
+                        foreach (var arch in version.Archives)
+                        {
+                            ProductModel.Exe.Add(arch.Exe);
+                            ProductModel.Installer.Add(arch.Installer);
+                            ProductModel.ReadMe.Add(arch.ReadMe);
+
+                        }
+                    }
+                    AllProducts.Add(ProductModel);
+                }
+
+            }
+
+            return View(AllProducts);
+        }
+
+        // GET: /Product/Details/5
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Product product;
+            ProductListView ProductModel = new ProductListView();
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
+                ProductModel.ProductName = product.ProductName;
+                ProductModel.Id = product.ProductId;
+
+                foreach (var version in product.Versions)
+                {
+                    ProductModel.VersionName.Add(version.VersionName);
+                    foreach (var arch in version.Archives)
+                    {
+                        ProductModel.Exe.Add(arch.Exe);
+                        ProductModel.Installer.Add(arch.Installer);
+                        ProductModel.ReadMe.Add(arch.ReadMe);
+
+                    }
+                }
+            }
+                if (product == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(ProductModel);
+            
+        }
+        // GET: /Product/Display/5
+        public ActionResult Display(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Product product;
+            ProductListView ProductModel = new ProductListView();
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
+                var archives = db.Archives.ToList();
+                ProductModel.ProductName = product.ProductName;
+                ProductModel.Id = product.ProductId;
+
+                foreach (var version in product.Versions)
+                {
+                    ProductModel.VersionName.Add(version.VersionName);
+                    foreach (var arch in version.Archives)
+                    {
+                        ProductModel.Exe.Add(arch.Exe);
+                        ProductModel.Installer.Add(arch.Installer);
+                        ProductModel.ReadMe.Add(arch.ReadMe);
+
+                    }
+                }
+            }
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(ProductModel);
+
+        }
+
+        // GET: /Product/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: /Product/Create
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [AcceptVerbs(HttpVerbs.Post)]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create([Bind(Include = "ProductId,ProductName, VersionName, Exe, Installer, ReadMe")] ProductCreateView product, HttpPostedFileBase file)
+        {
+           
+            if (ModelState.IsValid)
+            {
+                using (var db = new ProductDBContext())
+                {
+                    Product prod = new Product();
+                    prod.ProductName = product.ProductName;
+
+                    //db.SaveChanges();
+                    //var dbProduct = db.Products.First();
+                    Models.Archive ProductArchive = new Models.Archive();
+                    Models.Version ProductVersion = new Models.Version();
+                    ProductArchive.Installer = product.Installer;
+                    ProductArchive.Exe = product.Exe;
+                    ProductArchive.ReadMe = product.ReadMe;
+                    ProductVersion.Archives.Add(ProductArchive);
+                    ProductVersion.VersionName = product.VersionName;
+                    prod.Versions.Add(ProductVersion);
+                    db.Products.Add(prod);
+                    db.SaveChanges();
+
+                    if (Request.Files["file"].ContentLength > 0)
+                    {
+                        try
+                        {
+                            var fileName = Path.GetFileName(file.FileName);
+
+                            var path = Path.Combine(Server.MapPath("~/App_Data/uploads"), fileName);
+                            file.SaveAs(path);
+                        }
+                        catch(Exception ex)
+                        {
+                            ViewBag.Message = "ERROR:" + ex.Message.ToString();
+                        }
+                    }
+                    
+                }
+                return RedirectToAction("Index");
+            }
+
+            return View(product);
+        }
+
+        // GET: /Product/Edit/5
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Product product;
+            using (var db = new ProductDBContext()){
+               product = db.Products.Find(id);
+
+            }
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(product);
+        }
+
+        // POST: /Product/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include="ProductId,ProductName")] Product product)
+        {
+            if (ModelState.IsValid)
+            {
+                using (var db = new ProductDBContext()){
+                db.Entry(product).State = EntityState.Modified;
+                db.SaveChanges();
+                }
+                return RedirectToAction("Index");
+            }
+            return View(product);
+        }
+
+        // GET: /Product/Delete/5
+        public ActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Product product;
+            using (var db = new ProductDBContext()){
+            product = db.Products.Find(id);
+            }
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(product);
+        }
+
+        // POST: /Product/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            Product product;
+            using (var db = new ProductDBContext()){
+            product = db.Products.Find(id);
+            db.Products.Remove(product);
+            db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                using (var db = new ProductDBContext()){
+                db.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+    //Dowload Action
+        public ActionResult Download()
+        {
+                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString();
+                string FullFilePath = filePath + "\\ReadMe.docx";
+            byte[] fileBytes = System.IO.File.ReadAllBytes(FullFilePath);
+    string fileName = "ReadMe.docx";
+    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        }
+        /*
+        [HttpPost]
+        public ActionResult Upload(HttpPostedFileBase file)
+        {
+            if (file != null && file.ContentLength > 0)
+            {
+                var fileName = Path.GetFileName(file.FileName);
+
+                var path = Path.Combine(Server.MapPath("~/App_Data/uploads"), fileName);
+                file.SaveAs(path);
+            }
+            return RedirectToAction("Index");
+        }*/
+            
+
+            }
+        }
+    
+
