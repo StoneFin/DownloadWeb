@@ -4,6 +4,7 @@
 @{
     ViewBag.Title = "Create";
     var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
+    var search = ViewData["search"];
 
 }
 
@@ -83,7 +84,7 @@
 
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "Index", new { searchString = search })
 </div>
 
 @section Scripts {

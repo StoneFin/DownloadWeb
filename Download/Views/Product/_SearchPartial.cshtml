@@ -4,6 +4,7 @@
 
 @{
     ViewBag.Title = "_SearchPartial";
+    var search = ViewData["search"];
 
 }
 <div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
@@ -11,12 +12,12 @@
     <p>
         @if (User.IsInRole("admin"))
         {
-            @Html.ActionLink("Create New", "Create")
+            @Html.ActionLink("Create New", "Create", new { searchString = search })
         }
         @using (Html.BeginForm())
         {
         <p>
-            <b>Search Products: </b><input id="SearchString" name="SearchString" type="text" value="" class="btn btn-default" autocomplete="on" style="text-align: left; ">
+            <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete ="on" })
             <input type="submit" value="Search" class="btn btn-info" />
         </p>
         }
@@ -27,7 +28,7 @@
 
             @foreach (var item in Model)
             {
-                using (Html.BeginForm("Display", "Product", new { id = item.ProductId}))
+                using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search}))
                 {
 
                     <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
@@ -41,9 +42,8 @@
                         @if (User.IsInRole("admin") == true)
                         {
                             <td>
-                                @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
-                                @Html.ActionLink("Delete", "Delete", new { id = item.ProductId }) | 
-                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
+                                @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search }) |
+                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search })
                             </td>
                         }
                         

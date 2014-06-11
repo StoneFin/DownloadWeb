@@ -23,7 +23,7 @@ namespace Download.Controllers
         // GET: /Product/
         public ActionResult Index(string searchString, int? page)
         {
-
+            ViewData["search"] = searchString;
             List<Product> products = new List<Product>();
             //display 10 results per page
             int pageSize = 10;
@@ -99,8 +99,9 @@ namespace Download.Controllers
         [AllowAnonymous]
         // GET: /Product/Display/5
         //Displays a product's readme, and links for downloading
-        public ActionResult Display(int? id, int? VersionId)
+        public ActionResult Display(int? id, int? VersionId, string searchString)
         {
+            ViewData["search"] = searchString;
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -320,12 +321,13 @@ namespace Download.Controllers
         }
 
         // GET: /Product/Create
-        public ActionResult Create()
+        public ActionResult Create(string searchString)
         {
             List<SelectListItem> per = new List<SelectListItem>();
             per.Add(new SelectListItem { Text = "Public", Value = "2" });
             per.Add(new SelectListItem { Text = "Private", Value = "1" });
             ViewData["permissions"] = per;
+            ViewData["search"] = searchString;
             return View();
         }
 
@@ -437,8 +439,9 @@ namespace Download.Controllers
         }
 
         // GET: /Product/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? id, string searchString)
         {
+            ViewData["search"] = searchString;
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -659,8 +662,9 @@ namespace Download.Controllers
             return RedirectToAction("Index");
         }
         // GET: /Product/Delete/5
-        public ActionResult Remove(int? id)
+        public ActionResult Remove(int? id, string searchString)
         {
+            ViewData["search"] = searchString;
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

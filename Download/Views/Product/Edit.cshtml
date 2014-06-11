@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Edit";
+    var search = ViewData["search"];
 }
 
 <h2>Edit</h2>
@@ -79,7 +80,7 @@
 }
 
 <div >
-    <p class="tab">@Html.ActionLink("Back to List", "Index")</p>
+    <p class="tab">@Html.ActionLink("Back to List", "Index", new { searchString = search})</p>
 </div>
 
 @section Scripts {

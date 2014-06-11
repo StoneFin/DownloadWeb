@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Remove";
+    var search = ViewData["search"];
 }
 <h2>Remove</h2>
 <div style="background-color: rgba(255, 255, 255, 0.30)">
@@ -16,7 +17,7 @@
 
         <div class="form-actions no-color">
             <input type="submit" value="Remove" class="btn btn-danger" /> |
-            @Html.ActionLink("Back to List", "Index")
+            @Html.ActionLink("Back to List", "Index", new { searchString = search })
         </div>
     }
 </div>
