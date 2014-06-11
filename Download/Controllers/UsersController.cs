@@ -63,14 +63,7 @@ namespace Download.Controllers
         {
             return View();
         }
-       /* public class CreateUserModel
-        {
-            [Required] 
-            public string UserName { get;set;}
-            public string SelectedRole { get; set; }
-            [DataType(DataType.EmailAddress)]
-            public string Email { get; set; }
-        } */
+
         // POST: /Product/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -78,16 +71,7 @@ namespace Download.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "UserName,Roles,Email,ID")] ApplicationUser User, string roleName)
         {
-            //var role = new IdentityRole();
-            //List<SelectListItem> Allroles = new List<SelectListItem>();
-            //Allroles.Add(new SelectListItem { Text = role.Name, Value = role.Name });
-            //ViewData["roleName"] = Allroles;
-            //var RoleList = new List<string>();
-            //var RoleQry = from r in db.Roles
-              //            orderby r.Name
-              //            select r.Name;
-            //RoleList.AddRange(RoleQry.Distinct());
-            //ViewBag.AllRoles = RoleList.Select(x => new SelectListItem() { Text = x, Value = x });
+
 
             if (ModelState.IsValid)
             {
@@ -161,10 +145,6 @@ namespace Download.Controllers
                     dbUser.Email = User.Email;
                     dbUser.UserName = User.UserName;
 
-
-
-                    //var userRoles = dbUser.Roles;
-                    //compare and remove/add
                     if (dbUser.Roles.Count() == 0)
                     {
                         userManager.AddToRole(dbUser.Id, RoleName);
@@ -233,6 +213,105 @@ namespace Download.Controllers
                 }
             }
             base.Dispose(disposing);
+        }
+        public ActionResult MakeMember(string id)
+        {
+            using (var db = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(db);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+                var dbUser = db.Users.First(u => u.Id == id);
+
+
+                if (dbUser.Roles.Count() == 0)
+                {
+                    userManager.AddToRole(dbUser.Id, "member");
+                }
+                else
+                {
+                    foreach (var role in dbUser.Roles)
+                    {
+                        if (role.Role.Name != "member")
+                        {
+                            userManager.RemoveFromRole(dbUser.Id, role.Role.Name);
+                            userManager.AddToRole(dbUser.Id, "member");
+                            break;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+        public ActionResult MakeAdmin(string id)
+        {
+            using (var db = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(db);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+                var dbUser = db.Users.First(u => u.Id == id);
+
+
+                if (dbUser.Roles.Count() == 0)
+                {
+                    userManager.AddToRole(dbUser.Id, "admin");
+                }
+                else
+                {
+                    foreach (var role in dbUser.Roles)
+                    {
+                        if (role.Role.Name != "admin")
+                        {
+                            userManager.RemoveFromRole(dbUser.Id, role.Role.Name);
+                            userManager.AddToRole(dbUser.Id, "admin");
+                            break;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+        public ActionResult Deactivate(string id)
+        {
+            using (var db = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(db);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+                var dbUser = db.Users.First(u => u.Id == id);
+
+
+                if (dbUser.Roles.Count() == 0)
+                {
+                    userManager.AddToRole(dbUser.Id, "non-validated member");
+                }
+                else
+                {
+                    foreach (var role in dbUser.Roles)
+                    {
+                        if (role.Role.Name != "non-validated member")
+                        {
+                            userManager.RemoveFromRole(dbUser.Id, role.Role.Name);
+                            userManager.AddToRole(dbUser.Id, "non-validated member");
+                            break;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
         }
     }
 }

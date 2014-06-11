@@ -37,13 +37,16 @@
                         <td>
                             <input type="submit" value="Download" class="btn btn-primary" />
                         </td>
+                        
                         @if (User.IsInRole("admin") == true)
                         {
                             <td>
                                 @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
-                                @Html.ActionLink("Delete", "Delete", new { id = item.ProductId })
+                                @Html.ActionLink("Delete", "Delete", new { id = item.ProductId }) | 
+                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
                             </td>
                         }
+                        
                     </tr>
                 }
 

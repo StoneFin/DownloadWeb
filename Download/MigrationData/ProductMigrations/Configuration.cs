@@ -17,10 +17,10 @@ namespace Download.MigrationData.ProductMigrations
 
         protected override void Seed(Download.Models.ProductDBContext context)
         {
-            var product = new Product { ProductName = "TextPad" };
+            var product = new Product { ProductName = "TextPad", ProductStatus = 1};
 
-            var version1 = new Models.Version { VersionName = "1.0.0", Product = product };
-            var version2 = new Models.Version { VersionName = "2.0.0", Product = product };
+            var version1 = new Models.Version { VersionName = "1.0.0", Product = product, VersionStatus = 2 };
+            var version2 = new Models.Version { VersionName = "2.0.0", Product = product, VersionStatus = 2 };
             var archive1 = new Archive { Exe = "Exe Path1", Installer = "InstallerPath1", ReadMe = "Add ReadMe1", Version = version1 };
             var archive2 = new Archive { Exe = "Exe Path2", Installer = "InstallerPath2", ReadMe = "Add ReadMe2", Version = version1 };
 

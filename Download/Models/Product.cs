@@ -19,6 +19,8 @@ namespace Download.Models
             public Product(){
                 Versions = new List<Version>();
             }
+            [Required]
+            public int ProductStatus { get; set; }
         }
         public class Version
         {
@@ -36,6 +38,8 @@ namespace Download.Models
             public virtual Product Product { get; set; }
             [DataType(DataType.Date)]
             public DateTimeOffset DateCreated { get; set; }
+            [Required]
+            public int VersionStatus { get; set; }
 
  
 

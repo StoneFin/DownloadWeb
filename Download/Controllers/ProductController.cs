@@ -11,17 +11,19 @@ using System.IO;
 using System.Diagnostics;
 using System.Text;
 using PagedList;
+using Microsoft.AspNet.Identity;
 
 namespace Download.Controllers
 {
     [Authorize(Roles = "admin")]
     public class ProductController : Controller
     {
-        
+  
         [AllowAnonymous]
         // GET: /Product/
         public ActionResult Index(string searchString, int? page)
         {
+
             List<Product> products = new List<Product>();
             //display 10 results per page
             int pageSize = 10;
@@ -52,15 +54,12 @@ namespace Download.Controllers
                 //If there are no products in the database, display a blank Index
               if (products.Count() == 0)
                {
-
+                   products = ShowOnlyVisible(products);
                    return View(products.ToPagedList(pageNumber, pageSize));
                }
 
-
-
-
             }
-
+            products = ShowOnlyVisible(products);
             return View(products.ToPagedList(pageNumber, pageSize));
         }
 
@@ -87,7 +86,6 @@ namespace Download.Controllers
                         ProductModel.Exe.Add(arch.Exe);
                         ProductModel.Installer.Add(arch.Installer);
                         ProductModel.ReadMe.Add(arch.ReadMe);
-
                     }
                 }
             }
@@ -113,14 +111,22 @@ namespace Download.Controllers
             using (var db = new ProductDBContext())
             {
                 product = db.Products.Find(id);
+                //If a user somehow figured out the id of a hidden
+                //product and types it into the url
+                //return back to the index page
+                if (product.ProductStatus < 1)
+                {
+                    return RedirectToAction("index");
+                }
                 //populate archives so the product can find the corresponding archives
                 var archives = db.Archives.ToList();
                 ProductModel.ProductName = product.ProductName;
                 ProductModel.Id = product.ProductId;
                 //populate versions so the product can find the corresponding versions
                 var Versions = db.Versions.ToList();
+
                 
-                ProductModel.Versions = product.Versions.ToList();
+                ProductModel.Versions = GetVisibleVersions(product.Versions.ToList());
                 //Reverse the list so the most recent additions are at the lowest indicies 
                 ProductModel.Versions.Reverse();
                 //initiallize the markdown converter
@@ -165,15 +171,23 @@ namespace Download.Controllers
                     {
                             foreach (var arch in version.Archives)
                             {
-                                string fileName = filePath + arch.ReadMe.ToString();
-                                try
-                                {
-                                    var file = System.IO.File.ReadAllText(fileName);
-                                    ViewData["Content"] = md.Transform(file);
-                                }
-                                catch (Exception ex)
+                                if (arch.ReadMe == null || arch.ReadMe == "")
                                 {
                                     ViewData["Content"] = md.Transform("Could not find ReadMe");
+                                }
+                                else
+                                {
+
+                                    string fileName = filePath + arch.ReadMe.ToString();
+                                    try
+                                    {
+                                        var file = System.IO.File.ReadAllText(fileName);
+                                        ViewData["Content"] = md.Transform(file);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ViewData["Content"] = md.Transform("Could not find ReadMe");
+                                    }
                                 }
                                 break;
                             }
@@ -195,6 +209,10 @@ namespace Download.Controllers
         //Adds a version to the selected product
         public ActionResult AddVersion(int id)
         {
+            List<SelectListItem> per = new List<SelectListItem>();
+            per.Add(new SelectListItem { Text = "Public", Value = "2" });
+            per.Add(new SelectListItem { Text = "Private", Value = "1" });
+            ViewData["permissions"] = per;
             AddVersionView version = new AddVersionView();
             Product product = new Product();
             using(var db = new ProductDBContext()){
@@ -205,7 +223,7 @@ namespace Download.Controllers
             return View(version);
         }
         [HttpPost]
-        public ActionResult AddVersion(AddVersionView version)
+        public ActionResult AddVersion(AddVersionView version, string VStatus)
         {
             if(ModelState.IsValid){
             Product prod = new Product();
@@ -286,6 +304,7 @@ namespace Download.Controllers
                     ProductArchive.DateUploaded = DateTime.Now;
                     ProductVersion.Archives.Add(ProductArchive);
                     ProductVersion.DateCreated = DateTime.Now;
+                    ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
                     prod.Versions.Add(ProductVersion);
                     db.SaveChanges();
                     
@@ -303,6 +322,10 @@ namespace Download.Controllers
         // GET: /Product/Create
         public ActionResult Create()
         {
+            List<SelectListItem> per = new List<SelectListItem>();
+            per.Add(new SelectListItem { Text = "Public", Value = "2" });
+            per.Add(new SelectListItem { Text = "Private", Value = "1" });
+            ViewData["permissions"] = per;
             return View();
         }
 
@@ -312,16 +335,18 @@ namespace Download.Controllers
         [HttpPost]
         [AcceptVerbs(HttpVerbs.Post)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ProductId,ProductName")] ProductCreateView product)
+        public ActionResult Create([Bind(Include = "ProductId,ProductName,ProductStatus")] ProductCreateView product, string VStatus)
         {
            //refer to the comments of AddVersion to see how most of this works
             if (ModelState.IsValid)
             {
+
                 using (var db = new ProductDBContext())
                 {
                     Product prod = new Product();
                     prod.ProductName = product.ProductName;
                     var LastProduct = db.Products.ToList().Last();
+                    prod.ProductStatus = 1;
                     Models.Archive ProductArchive = new Models.Archive();
                     Models.Version ProductVersion = new Models.Version();
 
@@ -395,6 +420,7 @@ namespace Download.Controllers
                     }
                     ProductArchive.DateUploaded = DateTime.Now;
                     ProductVersion.Archives.Add(ProductArchive);
+                    ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
                     ProductVersion.DateCreated = DateTime.Now;
                     prod.Versions.Add(ProductVersion);
                     db.Products.Add(prod);
@@ -443,7 +469,7 @@ namespace Download.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="ProductId,ProductName")] Product product)
+        public ActionResult Edit([Bind(Include="ProductId,ProductName,ProductStatus")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -458,6 +484,7 @@ namespace Download.Controllers
         //Edits a selected version that is attached to a product
         public ActionResult EditVersion(int? id)
         {
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -480,6 +507,22 @@ namespace Download.Controllers
             {
                 return HttpNotFound();
             }
+            List<SelectListItem> per = new List<SelectListItem>();
+            //Check to see what current status is, and populate the list so
+            //the current one is shown first
+            if (version.VersionStatus > 1)
+            {
+                per.Add(new SelectListItem { Text = "Public", Value = "2" });
+                per.Add(new SelectListItem { Text = "Private", Value = "1" });
+            }
+            else
+            {
+                per.Add(new SelectListItem { Text = "Private", Value = "1" });
+                per.Add(new SelectListItem { Text = "Public", Value = "2" });
+
+
+            }
+            ViewData["permissions"] = per;
             return View(version);
         }
 
@@ -488,7 +531,7 @@ namespace Download.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditVersion([Bind(Include = "VersionName, VersionId")] Models.Version version)
+        public ActionResult EditVersion([Bind(Include = "VersionName, VersionId")] Models.Version version, string VStatus)
         {
             if (ModelState.IsValid)
             {
@@ -573,6 +616,7 @@ namespace Download.Controllers
                     {
                         vers.VersionName = versName;
                     }
+                    vers.VersionStatus = Convert.ToInt32(VStatus);
                     db.SaveChanges();
 
                 }
@@ -614,7 +658,39 @@ namespace Download.Controllers
             }
             return RedirectToAction("Index");
         }
+        // GET: /Product/Delete/5
+        public ActionResult Remove(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Product product;
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
+            }
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(product);
+        }
 
+        // POST: /Product/Delete/5
+        [HttpPost, ActionName("Remove")]
+        [ValidateAntiForgeryToken]
+        public ActionResult RemoveConfirmed(int id)
+        {
+            Product product;
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
+                product.ProductStatus = 0;
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -682,9 +758,43 @@ namespace Download.Controllers
         {
             return (int)id / 1000;
         }
-           
+        //This method return a product list of visible products, e.g., thier
+        //Status number is 1
+        public List<Product> ShowOnlyVisible(List<Product> products)
+        {
+            List<Product> visible = new List<Product>();
+            foreach (var product in products)
+            {
+                if (product.ProductStatus > 0)
+                {
+                    visible.Add(product);
+                }
+            }
+            return visible;
+        }
+        public List<Models.Version> GetVisibleVersions(List<Models.Version> versions)
+        {
+            List<Models.Version> Vversions = new List<Models.Version>();
+            if (User.IsInRole("admin") == true || User.IsInRole("member") == true)
+            {
+                return versions;
+            }
+            else
+            {
+                foreach (var vers in versions)
+                {
+                    if (vers.VersionStatus > 1)
+                    {
+                        Vversions.Add(vers);
+                    }
+                }
+                return Vversions;
             }
 
         }
+     }
+
+
+  }
     
 

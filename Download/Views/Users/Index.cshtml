@@ -19,7 +19,18 @@
         <th>
             @Html.Encode("Email")
         </th>
-        <th></th>
+        <th>
+
+        </th>
+        <th>
+
+        </th>
+        <th>
+
+        </th>
+        <th>
+
+        </th>
     </tr>
 
     @foreach (var item in Model)
@@ -51,10 +62,29 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
-           <td>
+            <td>
+                @using (Html.BeginForm("MakeMember", "Users", new { id = item.Id }))
+                {
+                    <input type="submit" value="Make Member" class="btn btn-primary" />
+                }
+            </td>
+            <td>
+                @using (Html.BeginForm("MakeAdmin", "Users", new { id = item.Id }))
+                {
+                    <input type="submit" value="Make Admin" class="btn btn-primary" />
+                }
+            </td>
+            <td>
+                @using (Html.BeginForm("Deactivate", "Users", new { id = item.Id }))
+                {
+                    <input type="submit" value="Deactivate" class="btn btn-primary" />
+                }
+            </td>
+            <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-               @Html.ActionLink("Delete", "Delete", new { id = item.Id}) 
-            </td> 
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
+ 
         </tr>
     }
 </table>

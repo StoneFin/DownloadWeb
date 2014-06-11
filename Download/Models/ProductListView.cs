@@ -42,6 +42,8 @@ namespace Download.Models
         public string ReadMe { get; set; }
         public string Installer { get; set; }
         public string Exe { get; set; }
+        public int ProductStatus { get; set; }
+        public int VersionStatus { get; set; }
     }
     public class ProductDisplayView
     {
@@ -67,6 +69,7 @@ namespace Download.Models
         public DateTimeOffset DatUploaded { get; set; }
         public string ProductName { get; set; }
         public int ProductId { get; set; }
+        public int VersionsStatus { get; set; }
  
     }
     

@@ -180,6 +180,10 @@
     <Compile Include="MigrationData\ProductMigrations\201406102204212_InitialCreate.Designer.cs">
       <DependentUpon>201406102204212_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="MigrationData\ProductMigrations\201406111625273_Adding Status Columns.cs" />
+    <Compile Include="MigrationData\ProductMigrations\201406111625273_Adding Status Columns.Designer.cs">
+      <DependentUpon>201406111625273_Adding Status Columns.cs</DependentUpon>
+    </Compile>
     <Compile Include="MigrationData\ProductMigrations\Configuration.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.Designer.cs">
@@ -241,6 +245,7 @@
     <Content Include="Views\Product\DeleteVersion.cshtml" />
     <Content Include="Views\Account\_ChangeEmailPartial.cshtml" />
     <Content Include="Views\Product\_SearchPartial.cshtml" />
+    <Content Include="Views\Product\Remove.cshtml" />
     <None Include="Views\Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.min.js" />
@@ -305,6 +310,9 @@
   <ItemGroup>
     <EmbeddedResource Include="MigrationData\ProductMigrations\201406102204212_InitialCreate.resx">
       <DependentUpon>201406102204212_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MigrationData\ProductMigrations\201406111625273_Adding Status Columns.resx">
+      <DependentUpon>201406111625273_Adding Status Columns.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\UserMigrations\201406102204488_InitialCreate.resx">
       <DependentUpon>201406102204488_InitialCreate.cs</DependentUpon>

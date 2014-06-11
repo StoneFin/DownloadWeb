@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "EditVersion";
+    var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
 }
 
 <h2>Edit Version</h2>
@@ -83,14 +84,21 @@
                 </div>
             </fieldset>
         </div>
+                <div class="form-group">
+            @Html.LabelFor(model => model.VersionStatus, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("VStatus", per)
+                @Html.ValidationMessageFor(model => model.VersionStatus)
+            </div>
+        </div>
         }
 
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save Changes" class="btn btn-default" /><br />
+                <input type="submit" value="Save Changes" class="btn btn-default" /><br /><br />
+                @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
             </div>
-            @Html.ActionLink("Back to Versions", "Edit", new {id = Model.ProductId })
         </div>
 
     }
