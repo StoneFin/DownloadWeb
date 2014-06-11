@@ -1,64 +1,41 @@
-﻿@model IEnumerable<Download.Models.ProductListView>
+﻿@model IEnumerable<Download.Models.Product>
 @using Download.Models
 
 @{
     ViewBag.Title = "Index";
 
 }
-<div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
-    <h2>Index</h2>
-    <p>
-        @if (User.IsInRole("admin"))
-        {
-            @Html.ActionLink("Create New", "Create")
-        }
-        @using (Html.BeginForm())
-        {
-        <p>
-            <b>Search Products: </b><input id="SearchString" name="SearchString" type="text" value="" class="btn btn-default" autocomplete="on" style="text-align: left; ">
-            <input type="submit" value="Search" class="btn btn-info" />
-        </p>
-        }
-    </p>
-        <table class="table table-hover" style="background-color: #ffffff; border: 2px solid #ffffff" >
 
-            <tr>
-                <th >
-                    <strong>@Html.DisplayNameFor(model => model.ProductName)</strong>
-                </th>
-                <th>
-                </th>
-                @if (User.IsInRole("admin") == true) 
-                { 
-                <th>
-                </th>
-                }
-           </tr>
-
-            @foreach (var item in Model)
-            {
-                using (Html.BeginForm("Display", "Product", new { id = item.Id }))
-                {
-
-                    <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
-                        <td style="font-size: larger; font-style: initial">
-                            @item.ProductName
-                        </td>
-                        <td>
-                            <input type="submit" value="Download" class="btn btn-primary" />
-                        </td>
-                        @if (User.IsInRole("admin") == true) 
-                        { 
-                        <td>
-                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-                        </td>
-                        }
-                    </tr>
-                }
-
-            }
-
-        </table>
-    <br />
+<div style="background-color: #4f51d0; border: 2px solid #ffffff; padding-left: 2em" class="text-white">
+    <h2>Welcome to Stonefin Tech Downloads!</h2>
+    @if (User.IsInRole("admin") == true || User.IsInRole("member") == true)
+    {
+        @*
+            Don't display teaser becuase members and admins have full access to 
+            downloadable stuff
+        *@
+    }
+    else if (User.IsInRole("non-validated memeber"))
+    {
+           <div class="body-content; text-muted" style="font-size: 20px">
+        Your account is currently in the process of being verified.
+    </div> 
+    }
+    else { 
+    <div class="body-content; text-muted" style="font-size: 20px">
+        Log in and get verified to gain access to
+        even more awesome downloadable stuff!
     </div>
+    }
+    <br />
+    <div class="body-content; text-muted" style="font-size: 20px">
+        Use the search to find the product you want, or
+        do a blank search to browse through all availiable
+        products
+    </div>
+    <br />
+</div>
+<br />
+<div>
+    @Html.Partial("_SearchPartial")
+</div>

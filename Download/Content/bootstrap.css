@@ -429,6 +429,9 @@ cite {
 .text-muted {
   color: #999999;
 }
+.text-white{
+    color: #ffffff;
+}
 
 .text-primary {
   color: #428bca;

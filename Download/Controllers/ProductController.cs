@@ -10,6 +10,7 @@ using Download.Models;
 using System.IO;
 using System.Diagnostics;
 using System.Text;
+using PagedList;
 
 namespace Download.Controllers
 {
@@ -19,10 +20,13 @@ namespace Download.Controllers
         
         [AllowAnonymous]
         // GET: /Product/
-        public ActionResult Index(string searchString)
+        public ActionResult Index(string searchString, int? page)
         {
-            List<ProductListView> AllProducts = new List<ProductListView>();
-            List<Product> products;
+            List<Product> products = new List<Product>();
+            //display 10 results per page
+            int pageSize = 10;
+            //return the value of page from the view, if it's null return 1
+            int pageNumber = (page ?? 1);
             //open database connection
             using (var db = new ProductDBContext())
             {
@@ -30,49 +34,34 @@ namespace Download.Controllers
                 var Sproducts = from p in db.Products
                                 select p;
 
-                if (!String.IsNullOrEmpty(searchString))
+                if (searchString != null)
                 {
                     //if the search string is not empty, then only return the matching products to the user
                     Sproducts = Sproducts.Where(s => s.ProductName.Contains(searchString));
                     products = Sproducts.ToList();
+                    page = 1;
                 }
-                else
+                else if(searchString == "")
                 {
                     products = db.Products.ToList();
                 }
-                //If there are no products in the database, display a blank Index
-               if (products.Count() == 0)
-               {
-                   return View(AllProducts);
-               }
-                //I used the firstArch and firstVersion to populate the archive and version fields of the product
-               var firstProduct = db.Products.First();
-               var firstArch = db.Archives.ToList();
-               var firstVersion = db.Versions.ToList();
-
-                foreach (var Product in products)
+                else
                 {
-                    ProductListView ProductModel = new ProductListView();
-                    ProductModel.ProductName = Product.ProductName;
-                    ProductModel.Id = Product.ProductId;
-
-                    foreach (var version in Product.Versions)
-                    {
-                        ProductModel.VersionName.Add(version.VersionName);
-                        foreach (var arch in version.Archives)
-                        {
-                            ProductModel.Exe.Add(arch.Exe);
-                            ProductModel.Installer.Add(arch.Installer);
-                            ProductModel.ReadMe.Add(arch.ReadMe);
-
-                        }
-                    }
-                    AllProducts.Add(ProductModel);
+                    //do nothing and return no products
                 }
+                //If there are no products in the database, display a blank Index
+              if (products.Count() == 0)
+               {
+
+                   return View(products.ToPagedList(pageNumber, pageSize));
+               }
+
+
+
 
             }
 
-            return View(AllProducts);
+            return View(products.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /Product/Details/5
