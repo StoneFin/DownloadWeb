@@ -69,7 +69,7 @@ namespace Download.Models
         public DateTimeOffset DatUploaded { get; set; }
         public string ProductName { get; set; }
         public int ProductId { get; set; }
-        public int VersionsStatus { get; set; }
+        public int VersionStatus { get; set; }
  
     }
     

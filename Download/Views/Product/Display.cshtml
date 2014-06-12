@@ -52,7 +52,7 @@
                 if (arch.Installer != null)
                 {
                      @Html.DisplayFor(model => arch.Installer)
-                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, extension = "\\" + Model.ProductName.ToString() + "\\" }))
+                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, archId = arch.ArchiveId }))
                 {
                             <input type="submit" value= "Download Installer" class="btn btn-primary" />
                 }
@@ -70,7 +70,7 @@
                 if (arch.Exe != null)
                 {
                      @Html.DisplayFor(model => arch.Exe)
-                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, extension = "\\" + Model.ProductName.ToString() + "\\" }))
+                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, archId = arch.ArchiveId }))
                 {
                         <input type="submit" value= "Download Exe" class="btn btn-primary" />
                 }

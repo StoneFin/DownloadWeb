@@ -246,6 +246,7 @@
     <Content Include="Views\Account\_ChangeEmailPartial.cshtml" />
     <Content Include="Views\Product\_SearchPartial.cshtml" />
     <Content Include="Views\Product\Remove.cshtml" />
+    <Content Include="Views\Product\RemoveVersion.cshtml" />
     <None Include="Views\Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.min.js" />

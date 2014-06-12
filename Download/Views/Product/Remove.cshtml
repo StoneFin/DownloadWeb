@@ -8,10 +8,10 @@
 <div style="background-color: rgba(255, 255, 255, 0.30)">
     <h3>Are you sure you want to remove @Model.ProductName?</h3>
     <hr />
-    <h4>This will NOT perminately delete the item from the database, it will only make the item invisible to all users. If you want to perminately delete this item,
-    use the Delete button.  In order to restore a removed item, you must manually go into the database and change the status column</h4>
+    <h4>This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
+     go into the database and change the status column</h4>
 
-    @using (Html.BeginForm())
+    @using (Html.BeginForm("Remove", "Product", new { searchString = search }))
     {
         @Html.AntiForgeryToken()
 

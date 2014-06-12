@@ -1,0 +1,26 @@
+﻿@model Download.Models.Version
+
+@{
+    ViewBag.Title = "RemoveVersion";
+    var search = ViewData["search"];
+}
+<h2>Remove</h2>
+<div style="background-color: rgba(255, 255, 255, 0.30)">
+    <h3>Are you sure you want to remove @Model.VersionName?</h3>
+    <hr />
+    <h4>
+        This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
+        go into the database and change the status column
+    </h4>
+
+    @using (Html.BeginForm("RemoveVersion", "Product", new { searchString = search }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Remove Version" class="btn btn-danger" /> |
+            @Html.ActionLink("Back to Versions", "Edit", new { searchString = search, id = Model.ProductId })
+        </div>
+    }
+</div>
+
