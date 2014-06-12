@@ -11,60 +11,56 @@
 <h2>Create Product</h2>
 
 
-        <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-        </asp:Content>
+    @using (Html.BeginForm("Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
 
-        <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-            @using (Html.BeginForm("Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
-                @Html.AntiForgeryToken()
-<div style="background-color: rgba(255, 255, 255, 0.29)">
-    <div class="form-horizontal">
+        <div class="form-horizontal">
 
-        <hr />
-        @Html.ValidationSummary(true)
+            <hr />
+            @Html.ValidationSummary(true)
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.ProductName)
-                @Html.ValidationMessageFor(model => model.ProductName)
+            <div class="form-group">
+                @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.ProductName)
+                    @Html.ValidationMessageFor(model => model.ProductName)
+                </div>
             </div>
         </div>
-    </div>
         <div class="form-group">
-                <fieldset>
-                    <div class=" col-md-10; col-md-offset-2">
+            <fieldset>
+                <div class=" col-md-10; col-md-offset-2">
 
-                        <p>
-                            Select an .exe: <input type="file" name="FileUpload1" />
-                        </p>
-                    </div>
-                </fieldset>
-            </div>
+                    <p>
+                        Select an .exe: <input type="file" name="FileUpload1" />
+                    </p>
+                </div>
+            </fieldset>
+        </div>
 
         <div class="form-group">
-                <fieldset>
-                    <div class=" col-md-10; col-md-offset-2">
+            <fieldset>
+                <div class=" col-md-10; col-md-offset-2">
 
-                        <p>
-                            Select an Installer: <input type="file" name="FileUpload2" />
-                        </p>
-                    </div>
-                </fieldset>
+                    <p>
+                        Select an Installer: <input type="file" name="FileUpload2" />
+                    </p>
+                </div>
+            </fieldset>
 
-            </div>
-      
+        </div>
+
         <div class="form-group">
-                <fieldset>
-                    <div class=" col-md-10; col-md-offset-2">
+            <fieldset>
+                <div class=" col-md-10; col-md-offset-2">
 
-                        <p>
-                            Select a ReadMe: <input type="file" name="FileUpload3" />
-                        </p>
-                    </div>
-                </fieldset>
-            </div>
+                    <p>
+                        Select a ReadMe: <input type="file" name="FileUpload3" />
+                    </p>
+                </div>
+            </fieldset>
+        </div>
         <div class="form-group">
             @Html.Label("Version Permissions", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -73,18 +69,18 @@
             </div>
         </div>
 
-                
-                 <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <br />
-            <input type="submit" value="Create" class="btn btn-default" /><br /><br />
-            @Html.ActionLink("Back to List", "Index") <br />
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <br />
+                <input type="submit" value="Create" class="btn btn-default" /><br /><br />
+                @Html.ActionLink("Back to List", "Index") <br />
+            </div>
         </div>
-    </div>
-</div>
-            }
 
+    }
 
+@*Another Default thing*@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

@@ -56,6 +56,7 @@ namespace Download.Controllers
             {
                 SaveInfo.page = page;
             }
+            ViewData["search"] = searchString;
             List<Product> products = new List<Product>();
             //display 10 results per page
             int pageSize = 2;

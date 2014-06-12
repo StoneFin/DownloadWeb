@@ -9,10 +9,6 @@
 
 <h2>Add Version</h2>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-</asp:Content>
-
-<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     @using (Html.BeginForm("AddVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
@@ -63,7 +59,7 @@
             <br />
             <div class="col-md-offset-2 col-md-10">
                 <br />
-                <input type="submit" value="Add Version" class="btn btn-default" /><br />
+                <input type="submit" value="Add Version" class="btn btn-default" /><br /><br />
                 @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
             </div>
         </div>
