@@ -25,7 +25,7 @@
         </div>
         <div class="form-group">
                 <fieldset>
-                    <div>
+                    <div class=" col-md-10; col-md-offset-2">
                         <p>
                             Select an .exe: <input type="file" name="FileUpload1" />
                         </p>
@@ -34,7 +34,7 @@
             </div>
         <div class="form-group">
             <fieldset>
-                <div>
+                <div class=" col-md-10; col-md-offset-2">
                     <p>
                         Select an Installer: <input type="file" name="FileUpload2" />
                     </p>
@@ -45,24 +45,28 @@
 
         <div class="form-group">
             <fieldset>
-                <div>
+                <div class=" col-md-10; col-md-offset-2">
                     <p>
                         Select a ReadMe: <input type="file" name="FileUpload3" />
                     </p>
                 </div>
             </fieldset>
         </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Add Version" class="btn btn-default" /><br />
-            </div>
-        </div>
-                <div class="form-group">
+                        <div class="form-group">
             @Html.LabelFor(model => model.VersionStatus, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("VStatus", per);
+                @Html.DropDownList("VStatus", per)
                 @Html.ValidationMessageFor(model => model.VersionStatus)
             </div>
         </div>
+        <div class="form-group">
+            <br />
+            <div class="col-md-offset-2 col-md-10">
+                <br />
+                <input type="submit" value="Add Version" class="btn btn-default" /><br />
+                @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+            </div>
+        </div>
+
 
     }

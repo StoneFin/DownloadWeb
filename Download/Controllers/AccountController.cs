@@ -12,6 +12,7 @@ using Download.Models;
 
 namespace Download.Controllers
 {
+    //This whole controller was default so for the most part I don't know or care what's going on, but I did make a few changes
     [Authorize]
     public class AccountController : Controller
     {
@@ -45,17 +46,20 @@ namespace Download.Controllers
         {
             if (ModelState.IsValid)
             {
+                //This is how I allowed the user to enter an email and password to login, instead of a userName and password
                 string LogUser;
                 using (var db = new ApplicationDbContext())
                 {
                     try
                     {
+                        //find the user who's email matches the one given, and return the userName
                         LogUser = (from u in db.Users
                                    where u.Email == model.Email
                                    select u.UserName).Single();
                     }
                     catch(Exception ex)
                     {
+                        //If none can be found, give the usermanager an invalide username to throw an error
                         LogUser = " ";
                     }
                 }
@@ -100,6 +104,7 @@ namespace Download.Controllers
                     {
                         var userStore = new UserStore<ApplicationUser>(db);
                         var userManager = new UserManager<ApplicationUser>(userStore);
+                        //The default role when a user registers is non-validated user
                         userManager.AddToRole(user.Id, "non-validated member");
                     }
                     await SignInAsync(user, isPersistent: false);
@@ -167,6 +172,7 @@ namespace Download.Controllers
             bool hasPassword = HasPassword();
             ViewBag.HasLocalPassword = hasPassword;
             ViewBag.ReturnUrl = Url.Action("Manage");
+            //if email is not null, then change the email to the given email
             if (email != null)
             {
                 using (var db = new ApplicationDbContext())
@@ -176,10 +182,12 @@ namespace Download.Controllers
                     db.SaveChanges();
                 }
             }
+            //If the change password form is blank, then the user only wanted to change thier email, so dislpaly success message
             if (model.ConfirmPassword == null && model.NewPassword == null && model.OldPassword == null)
             {
                 return RedirectToAction("Manage", new { Message = ManageMessageId.ChangeEmailSuccess });
             }
+                //else the user wants to change thier password, and this is all default stuff
             else
             {
                 if (hasPassword)
@@ -417,7 +425,7 @@ namespace Download.Controllers
             }
             else
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Product");
             }
         }
 

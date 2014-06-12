@@ -4,7 +4,10 @@
 
 @{
     ViewBag.Title = "_SearchPartial";
+    //this allows to view to see what was previously typed into the search bar
     var search = ViewData["search"];
+
+
 
 }
 <div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
@@ -17,6 +20,7 @@
         @using (Html.BeginForm())
         {
         <p>
+            @*The default text in the search bar is the text from the last search*@
             <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete ="on" })
             <input type="submit" value="Search" class="btn btn-info" />
         </p>
@@ -28,7 +32,7 @@
 
             @foreach (var item in Model)
             {
-                using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search}))
+                using (Html.BeginForm("Display", "Product", new { id = item.ProductId}))
                 {
 
                     <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
@@ -42,8 +46,8 @@
                         @if (User.IsInRole("admin") == true)
                         {
                             <td>
-                                @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search }) |
-                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search })
+                                @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
+                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
                             </td>
                         }
                         
@@ -59,7 +63,7 @@
         <div>
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
-    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page}))
             </div>
     }
     </div>

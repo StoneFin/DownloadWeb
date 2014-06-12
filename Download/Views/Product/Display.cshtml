@@ -6,7 +6,8 @@
     var path = ViewData["ReadMe"];
     int i = 0;
     var file = ViewData["Content"];
-    var search = ViewData["search"];
+
+
 }
 
 <h2>@Model.ProductName</h2>
@@ -107,5 +108,5 @@
     </div>
 <br />
 <p>
-    @Html.ActionLink("Back to List", "Index", new { searchString = search })
+    @Html.ActionLink("Back to List", "Index")
 </p>

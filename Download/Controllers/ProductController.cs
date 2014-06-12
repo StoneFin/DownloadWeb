@@ -15,18 +15,50 @@ using Microsoft.AspNet.Identity;
 
 namespace Download.Controllers
 {
+
     [Authorize(Roles = "admin")]
     public class ProductController : Controller
     {
-  
+        //class that saves the search and page number so the back to list links return the user to where they left off
+        public class SaveInfo
+        {
+            public static int? page;
+            public static string search;
+        }
+
         [AllowAnonymous]
         // GET: /Product/
         public ActionResult Index(string searchString, int? page)
         {
-            ViewData["search"] = searchString;
+            //if null, then check to see if there is any data in the saved search
+            if (searchString == null)
+            {
+                searchString = SaveInfo.search;
+            }
+                //if they are the same, the the user re-typed the same seach, and redirect back to page one
+            else if(searchString == SaveInfo.search)
+            {
+                page = 1;
+            }
+                //The user entered a new search, start out on page one
+            else
+            {
+                SaveInfo.search = searchString;
+                page = 1;
+            }
+            //if page is null, then check to see if there is a saved page
+            if (page == null)
+            {
+                page = SaveInfo.page;
+            }
+                //else display selected page and save the page
+            else
+            {
+                SaveInfo.page = page;
+            }
             List<Product> products = new List<Product>();
             //display 10 results per page
-            int pageSize = 10;
+            int pageSize = 2;
             //return the value of page from the view, if it's null return 1
             int pageNumber = (page ?? 1);
             //open database connection
@@ -35,34 +67,37 @@ namespace Download.Controllers
                 //Selects all products in the database
                 var Sproducts = from p in db.Products
                                 select p;
-
-                if (searchString != null)
+                //blank search, return all products
+                if (searchString == "")
+                {
+                    products = db.Products.ToList();
+                }
+                    //user entered a search, return matching products
+                else if (searchString != null)
                 {
                     //if the search string is not empty, then only return the matching products to the user
                     Sproducts = Sproducts.Where(s => s.ProductName.Contains(searchString));
                     products = Sproducts.ToList();
                     page = 1;
                 }
-                else if(searchString == "")
-                {
-                    products = db.Products.ToList();
-                }
+                    //page was just initialized and display nothing
                 else
                 {
-                    //do nothing and return no products
                 }
                 //If there are no products in the database, display a blank Index
-              if (products.Count() == 0)
-               {
-                   products = ShowOnlyVisible(products);
-                   return View(products.ToPagedList(pageNumber, pageSize));
-               }
+                if (products.Count() == 0)
+                {
+                    //call show only visible products to hide the products that were removed
+                    products = ShowOnlyVisible(products);
+                    //reutnr the ToPagedList to add paging to the display
+                    return View(products.ToPagedList(pageNumber, pageSize));
+                }
 
             }
             products = ShowOnlyVisible(products);
             return View(products.ToPagedList(pageNumber, pageSize));
         }
-
+        //Not Used but kept just in case
         // GET: /Product/Details/5
         public ActionResult Details(int? id)
         {
@@ -89,19 +124,20 @@ namespace Download.Controllers
                     }
                 }
             }
-                if (product == null)
-                {
-                    return HttpNotFound();
-                }
-                return View(ProductModel);
-            
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+            return View(ProductModel);
+
         }
         [AllowAnonymous]
         // GET: /Product/Display/5
         //Displays a product's readme, and links for downloading
-        public ActionResult Display(int? id, int? VersionId, string searchString)
+        public ActionResult Display(int? id, int? VersionId)
         {
-            ViewData["search"] = searchString;
+
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -141,7 +177,7 @@ namespace Download.Controllers
                     {
                         if (version.VersionId == VersionId)
                         {
-                            //Remove the version and insert it at the beginning so it is displayed on the page
+                            //Remove the selected version and insert it at the beginning so it is displayed on the page
                             ProductModel.Versions.Remove(version);
                             ProductModel.Versions.Insert(0, version);
 
@@ -153,8 +189,8 @@ namespace Download.Controllers
                                 string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
                                 try
                                 {
-                                   var file = System.IO.File.ReadAllText(fileName);
-                                   ViewData["Content"] = md.Transform(file);
+                                    var file = System.IO.File.ReadAllText(fileName);
+                                    ViewData["Content"] = md.Transform(file);
                                 }
                                 catch (Exception ex)
                                 {
@@ -166,39 +202,42 @@ namespace Download.Controllers
 
                     }
                 }
-                    //If no version is selected, display the default version which is the most recently added version
+                //If no version is selected, display the default version which is the most recently added version
                 else
                 {
                     foreach (var version in ProductModel.Versions)
                     {
-                            foreach (var arch in version.Archives)
+                        foreach (var arch in version.Archives)
+                        {
+                            //if there is no readMe, display 'could no find readme'
+                            if (arch.ReadMe == null || arch.ReadMe == "")
                             {
-                                if (arch.ReadMe == null || arch.ReadMe == "")
+                                ViewData["Content"] = md.Transform("Could not find ReadMe");
+                            }
+                            else
+                            {
+                                //grab the index of the archive to find it in the server
+                                ArchiveIndex = arch.ArchiveId;
+                                string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
+                                try
+                                {
+                                    var file = System.IO.File.ReadAllText(fileName);
+                                    //convert the markdown readme into Html
+                                    ViewData["Content"] = md.Transform(file);
+                                }
+                                catch (Exception ex)
                                 {
                                     ViewData["Content"] = md.Transform("Could not find ReadMe");
                                 }
-                                else
-                                {
-                                    ArchiveIndex = arch.ArchiveId;
-                                    string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
-                                    try
-                                    {
-                                        var file = System.IO.File.ReadAllText(fileName);
-                                        ViewData["Content"] = md.Transform(file);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        ViewData["Content"] = md.Transform("Could not find ReadMe");
-                                    }
-                                }
-                                break;
                             }
                             break;
+                        }
+                        break;
                     }
 
                 }
             }
-            
+
 
 
             if (product == null)
@@ -212,12 +251,14 @@ namespace Download.Controllers
         public ActionResult AddVersion(int id)
         {
             List<SelectListItem> per = new List<SelectListItem>();
+            //populate the select list item with the public or private options for the version
             per.Add(new SelectListItem { Text = "Public", Value = "2" });
             per.Add(new SelectListItem { Text = "Private", Value = "1" });
             ViewData["permissions"] = per;
             AddVersionView version = new AddVersionView();
             Product product = new Product();
-            using(var db = new ProductDBContext()){
+            using (var db = new ProductDBContext())
+            {
                 product = db.Products.Find(id);
             }
             version.ProductName = product.ProductName;
@@ -227,19 +268,22 @@ namespace Download.Controllers
         [HttpPost]
         public ActionResult AddVersion(AddVersionView version, string VStatus)
         {
-            if(ModelState.IsValid){
-            Product prod = new Product();
-            Models.Version ProductVersion = new Models.Version();
-            Archive ProductArchive = new Archive();
-            using (var db = new ProductDBContext())
+            if (ModelState.IsValid)
             {
-                var LastArchive = db.Archives.ToList().Last();
-                //add one to the last archive id to get this archvie Id before it is put in the database
-                string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
-                int ArchIndex = LastArchive.ArchiveId + 1;
-                prod = db.Products.Find(version.ProductId);
-                //Add the files to the appropriate folder based on the name, such as '.exe', or 'ReadMe'
-                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(prod.ProductId).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
+                Product prod = new Product();
+                Models.Version ProductVersion = new Models.Version();
+                Archive ProductArchive = new Archive();
+                using (var db = new ProductDBContext())
+                {
+                    //find the last archive's id number to anticipate the added archive's id before it is added to the database
+                    var LastArchive = db.Archives.ToList().Last();
+                    //add one to the last archive id to get this archvie Id before it is put in the database
+                    //This string appends the archive Id in front of the name to allow for easy access in the directories
+                    string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
+                    int ArchIndex = LastArchive.ArchiveId + 1;
+                    prod = db.Products.Find(version.ProductId);
+                    //Add the files and extract the version from the file, with the version extracted from the .exe given the highest priority
+                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(prod.ProductId).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
                     foreach (string file in Request.Files)
                     {
                         try
@@ -255,7 +299,7 @@ namespace Download.Controllers
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
                                 Request.Files[file].SaveAs(path);
-                                //grap the version out of the .exe file
+                                //grab the version out of the .exe file
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
                             }
@@ -276,7 +320,8 @@ namespace Download.Controllers
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
                                 }
                             }
-                            else if(fileName.CompareTo("") == 0){
+                            else if (fileName.CompareTo("") == 0)
+                            {
                                 //If the fileName is blank, then no file was selected, and do nothing
 
                             }
@@ -305,7 +350,7 @@ namespace Download.Controllers
                             ViewBag.Message = "No files chosen";
                         }
                     }
-                //If there still is no version name, then we have no information on the version, so the default version is 'no info'
+                    //If there still is no version name, then we have no information on the version, so the default version is 'no info'
                     if (ProductVersion.VersionName == null)
                     {
                         ProductVersion.VersionName = "No info";
@@ -316,10 +361,10 @@ namespace Download.Controllers
                     ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
                     prod.Versions.Add(ProductVersion);
                     db.SaveChanges();
-                    
 
 
-                    
+
+
                 }
                 //return to the previous page
                 return RedirectToAction("Edit/" + version.ProductId.ToString());
@@ -329,13 +374,13 @@ namespace Download.Controllers
         }
 
         // GET: /Product/Create
-        public ActionResult Create(string searchString)
+        public ActionResult Create()
         {
+            //populate the permissions drop down list with either public or private
             List<SelectListItem> per = new List<SelectListItem>();
             per.Add(new SelectListItem { Text = "Public", Value = "2" });
             per.Add(new SelectListItem { Text = "Private", Value = "1" });
             ViewData["permissions"] = per;
-            ViewData["search"] = searchString;
             return View();
         }
 
@@ -347,7 +392,7 @@ namespace Download.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ProductId,ProductName,ProductStatus")] ProductCreateView product, string VStatus)
         {
-           //refer to the comments of AddVersion to see how most of this works
+            //refer to the comments of AddVersion to see how most of this works
             if (ModelState.IsValid)
             {
 
@@ -367,69 +412,69 @@ namespace Download.Controllers
 
                     //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
                     string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex((LastProduct.ProductId + 1)).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
-                        foreach (string file in Request.Files)
+                    foreach (string file in Request.Files)
+                    {
+                        try
                         {
-                            try
+                            var fileName = Request.Files[file].FileName;
+                            if (fileName.Contains(".exe"))
                             {
-                                var fileName = Request.Files[file].FileName;
-                                if (fileName.Contains(".exe"))
+                                ProductArchive.Exe = fileName;
+                                if (!Directory.Exists(filePath))
                                 {
-                                    ProductArchive.Exe = fileName;
-                                    if (!Directory.Exists(filePath))
-                                    {
-                                        Directory.CreateDirectory(filePath);
-                                    }
-                                    fileName = CurrArchId + fileName;
-                                    var path = Path.Combine(filePath, fileName);
-                                    Request.Files[file].SaveAs(path);
-                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                    Directory.CreateDirectory(filePath);
+                                }
+                                fileName = CurrArchId + fileName;
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[file].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                ProductVersion.VersionName = versionInfo.ProductVersion;
+                            }
+                            else if (fileName.Contains("ReadMe"))
+                            {
+                                ProductArchive.ReadMe = fileName;
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
+                                fileName = CurrArchId + fileName;
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[file].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                if (ProductVersion.VersionName == null)
+                                {
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
                                 }
-                                else if (fileName.Contains("ReadMe"))
-                                {
-                                    ProductArchive.ReadMe = fileName;
-                                    if (!Directory.Exists(filePath))
-                                    {
-                                        Directory.CreateDirectory(filePath);
-                                    }
-                                    fileName = CurrArchId + fileName;
-                                    var path = Path.Combine(filePath, fileName);
-                                    Request.Files[file].SaveAs(path);
-                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                    if (ProductVersion.VersionName == null)
-                                    {
-                                        ProductVersion.VersionName = versionInfo.ProductVersion;
-                                    }
-                                }
-                                else if (fileName.CompareTo("") == 0)
-                                {
-                                    //if the fileName is blank, then no file was selected and do nothing
-                                }
-                                else
-                                {
-                                    ProductArchive.Installer = fileName;
-                                    if (!Directory.Exists(filePath))
-                                    {
-                                        Directory.CreateDirectory(filePath);
-                                    }
-                                    fileName = CurrArchId + fileName;
-                                    var path = Path.Combine(filePath, fileName);
-                                    Request.Files[file].SaveAs(path);
-                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                    if (ProductVersion.VersionName == null)
-                                    {
-                                        ProductVersion.VersionName = versionInfo.ProductVersion;
-                                    }
-                                }
-
-
                             }
-
-                            catch (Exception ex)
+                            else if (fileName.CompareTo("") == 0)
                             {
-                                ViewBag.Message = "No files chosen";
+                                //if the fileName is blank, then no file was selected and do nothing
                             }
+                            else
+                            {
+                                ProductArchive.Installer = fileName;
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
+                                fileName = CurrArchId + fileName;
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[file].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                if (ProductVersion.VersionName == null)
+                                {
+                                    ProductVersion.VersionName = versionInfo.ProductVersion;
+                                }
+                            }
+
+
                         }
+
+                        catch (Exception ex)
+                        {
+                            ViewBag.Message = "No files chosen";
+                        }
+                    }
                     if (ProductVersion.VersionName == null)
                     {
                         ProductVersion.VersionName = "No info";
@@ -441,10 +486,10 @@ namespace Download.Controllers
                     prod.Versions.Add(ProductVersion);
                     db.Products.Add(prod);
                     db.SaveChanges();
-                    
 
 
-                    
+
+
                 }
                 return RedirectToAction("Index");
             }
@@ -453,26 +498,30 @@ namespace Download.Controllers
         }
 
         // GET: /Product/Edit/5
-        public ActionResult Edit(int? id, string searchString)
+        public ActionResult Edit(int? id)
         {
-            ViewData["search"] = searchString;
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Product product;
-            using (var db = new ProductDBContext()){
+            using (var db = new ProductDBContext())
+            {
+                //populate the archives and versions so the product can find the corresponding versions and archives
                 var archives = db.Archives.ToList();
                 var allVersions = db.Versions.ToList();
-               product = db.Products.Find(id);
-               product.Versions = GetVisibleVersions(product.Versions.ToList());
-               foreach (var version in product.Versions)
-               {
-                   foreach (var arch in version.Archives)
-                   {
+                product = db.Products.Find(id);
+                //grab only the visible versions becuase if a version is invisible, then it was removed by the admin
+                product.Versions = GetVisibleVersions(product.Versions.ToList());
+                foreach (var version in product.Versions)
+                {
+                    //populate the list.  I found that if I did not do this, the product's versions and archives would be null
+                    foreach (var arch in version.Archives)
+                    {
 
-                   }
-               }
+                    }
+                }
 
             }
             if (product == null)
@@ -487,13 +536,14 @@ namespace Download.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="ProductId,ProductName,ProductStatus")] Product product)
+        public ActionResult Edit([Bind(Include = "ProductId,ProductName,ProductStatus")] Product product)
         {
             if (ModelState.IsValid)
             {
-                using (var db = new ProductDBContext()){
-                db.Entry(product).State = EntityState.Modified;
-                db.SaveChanges();
+                using (var db = new ProductDBContext())
+                {
+                    db.Entry(product).State = EntityState.Modified;
+                    db.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -510,6 +560,7 @@ namespace Download.Controllers
             Models.Version version;
             using (var db = new ProductDBContext())
             {
+                //populate the archives and version becuase again, I found that If i did not do this, that everything would be null
                 var archives = db.Archives.ToList();
                 var allVersions = db.Versions.ToList();
                 version = db.Versions.Find(id);
@@ -646,11 +697,11 @@ namespace Download.Controllers
                 }
                 return RedirectToAction("Edit/" + vers.ProductId.ToString());
             }
-                return View(version);
-            
-        }
-        
+            return View(version);
 
+        }
+
+        //Not used, put left just in case
         // GET: /Product/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -659,8 +710,9 @@ namespace Download.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Product product;
-            using (var db = new ProductDBContext()){
-            product = db.Products.Find(id);
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
             }
             if (product == null)
             {
@@ -668,24 +720,26 @@ namespace Download.Controllers
             }
             return View(product);
         }
-
+        //not used
         // POST: /Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             Product product;
-            using (var db = new ProductDBContext()){
-            product = db.Products.Find(id);
-            db.Products.Remove(product);
-            db.SaveChanges();
+            using (var db = new ProductDBContext())
+            {
+                product = db.Products.Find(id);
+                db.Products.Remove(product);
+                db.SaveChanges();
             }
             return RedirectToAction("Index");
         }
+        //Hides the product from being seen by all users, without actually deleting it
         // GET: /Product/Remove/5
-        public ActionResult Remove(int? id, string searchString)
+        public ActionResult Remove(int? id)
         {
-            ViewData["search"] = searchString;
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -705,22 +759,24 @@ namespace Download.Controllers
         // POST: /Product/Remove/5
         [HttpPost, ActionName("Remove")]
         [ValidateAntiForgeryToken]
-        public ActionResult RemoveConfirmed(int id, string searchString)
+        public ActionResult RemoveConfirmed(int id)
         {
-            ViewData["search"] = searchString;
+
             Product product;
             using (var db = new ProductDBContext())
             {
                 product = db.Products.Find(id);
+                //change the ProductStatus to 0 which means 'not visible'
                 product.ProductStatus = 0;
                 db.SaveChanges();
             }
             return RedirectToAction("Index");
         }
+        //Hides a specified version from all users, without actually deleting it
         // GET: /Product/RemoveVersion/5
-        public ActionResult RemoveVersion(int? id, string searchString)
+        public ActionResult RemoveVersion(int? id)
         {
-            ViewData["search"] = searchString;
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -737,31 +793,35 @@ namespace Download.Controllers
             return View(version);
         }
 
-        // POST: /Product/Remove/5
+        // POST: /Product/RemoveVersion/5
         [HttpPost, ActionName("RemoveVersion")]
         [ValidateAntiForgeryToken]
-        public ActionResult RemoveVersionConfirmed(int id, string searchString)
+        public ActionResult RemoveVersionConfirmed(int id)
         {
-            ViewData["search"] = searchString;
+
             Models.Version versions;
             using (var db = new ProductDBContext())
             {
                 versions = db.Versions.Find(id);
+                //sets the VersionStatus to zero which is invisible to all users
                 versions.VersionStatus = 0;
                 db.SaveChanges();
             }
             return RedirectToAction("Index");
         }
+        //This was a default method when I created the controller and I'm not sure what it does
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                using (var db = new ProductDBContext()){
-                db.Dispose();
+                using (var db = new ProductDBContext())
+                {
+                    db.Dispose();
                 }
             }
             base.Dispose(disposing);
         }
+        //Initially created in an earlier implementation of this, but it is not used now
         // GET: /Product/DeleteVersion/5
         public ActionResult DeleteVersion(int? id)
         {
@@ -796,13 +856,15 @@ namespace Download.Controllers
             return RedirectToAction("Index");
         }
         [AllowAnonymous]
-    //Dowload Action which returns the selected file to the user
+        //Dowload Action which returns the selected file to the user
         public ActionResult Download(string fileName, int id, int archId)
         {
 
             try
             {
+                //append the archive id to the front of the fileName so the file can be found
                 fileName = archId.ToString() + "_" + fileName;
+                //add the appropriate extensions on to the root path
                 string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(id).ToString("D8") + "\\" + GetIndex(archId).ToString("D8") + "\\";
                 string FullFilePath = filePath + fileName;
                 byte[] fileBytes = System.IO.File.ReadAllBytes(FullFilePath);
@@ -810,10 +872,12 @@ namespace Download.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Message = "ERROR " + ex.ToString();
+                ViewBag.Message = "Error, could not find file";
+                //if there was an error, then redirect to the same page
                 return RedirectToAction("Display/" + id.ToString());
             }
         }
+
         //this method gets the proper index of the folder that the product is in
         //This method also makes it so a new folder is created for every 1000 products
 
@@ -828,7 +892,7 @@ namespace Download.Controllers
             index = index * 1000;
             return index;
         }
-        //This method return a product list of visible products, e.g., thier
+        //This method return a product list of visible products, e.g., if thier
         //Status number is 1
         public List<Product> ShowOnlyVisible(List<Product> products)
         {
@@ -842,9 +906,11 @@ namespace Download.Controllers
             }
             return visible;
         }
+        //This method figures out which versions should be hidden and which should be available to certain users
         public List<Models.Version> GetVisibleVersions(List<Models.Version> versions)
         {
             List<Models.Version> Vversions = new List<Models.Version>();
+            //if the user is an admin or member, they have access to all visible files, e.g. the VersionStatus Number is greater than one
             if (User.IsInRole("admin") == true || User.IsInRole("member") == true)
             {
                 foreach (var vers in versions)
@@ -856,6 +922,8 @@ namespace Download.Controllers
                 }
                 return Vversions;
             }
+                //if they are not a member or admin, then they are either an annonomous user, or a non-validated member, both of wich have the same permissions
+                //to view public files, whos VersionStatus number is 2.
             else
             {
                 foreach (var vers in versions)
@@ -869,9 +937,9 @@ namespace Download.Controllers
             }
 
         }
-     }
+    }
 
 
-  }
+}
     
 

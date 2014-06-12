@@ -6,6 +6,7 @@ using System.Web.Mvc;
 
 namespace MarkdownDeepSample.Controllers
 {
+    //This is the thrid party MarkDown to Html conterter I downloaded, so I haven't messed with this
 	[HandleError]
 	public class MarkdownDeepController : Controller
 	{

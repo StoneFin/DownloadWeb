@@ -4,11 +4,11 @@
 @{
     ViewBag.Title = "Create";
     var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
-    var search = ViewData["search"];
+
 
 }
 
-<h2>Create</h2>
+<h2>Create Product</h2>
 
 
         <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
@@ -18,9 +18,9 @@
             @using (Html.BeginForm("Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
             {
                 @Html.AntiForgeryToken()
-
+<div style="background-color: rgba(255, 255, 255, 0.29)">
     <div class="form-horizontal">
-        <h4>Product</h4>
+
         <hr />
         @Html.ValidationSummary(true)
 
@@ -34,10 +34,10 @@
     </div>
         <div class="form-group">
                 <fieldset>
-                    <div>
+                    <div class=" col-md-10; col-md-offset-2">
 
                         <p>
-                            Select an .exe: <input type="file" name="FileUpload1"  />
+                            Select an .exe: <input type="file" name="FileUpload1" />
                         </p>
                     </div>
                 </fieldset>
@@ -45,7 +45,7 @@
 
         <div class="form-group">
                 <fieldset>
-                    <div>
+                    <div class=" col-md-10; col-md-offset-2">
 
                         <p>
                             Select an Installer: <input type="file" name="FileUpload2" />
@@ -57,7 +57,7 @@
       
         <div class="form-group">
                 <fieldset>
-                    <div>
+                    <div class=" col-md-10; col-md-offset-2">
 
                         <p>
                             Select a ReadMe: <input type="file" name="FileUpload3" />
@@ -66,26 +66,25 @@
                 </fieldset>
             </div>
         <div class="form-group">
-            @Html.LabelFor(model => model.VersionStatus, new { @class = "control-label col-md-2" })
+            @Html.Label("Version Permissions", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("VStatus", per);
+                @Html.DropDownList("VStatus", per)
                 @Html.ValidationMessageFor(model => model.VersionStatus)
             </div>
         </div>
-    
+
                 
                  <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Create" class="btn btn-default" /><br />
+            <br />
+            <input type="submit" value="Create" class="btn btn-default" /><br /><br />
+            @Html.ActionLink("Back to List", "Index") <br />
         </div>
     </div>
-
+</div>
             }
 
 
-<div>
-    @Html.ActionLink("Back to List", "Index", new { searchString = search })
-</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

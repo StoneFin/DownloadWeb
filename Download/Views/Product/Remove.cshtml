@@ -3,6 +3,10 @@
 @{
     ViewBag.Title = "Remove";
     var search = ViewData["search"];
+    if (search == null)
+    {
+        search = " ";
+    }
 }
 <h2>Remove</h2>
 <div style="background-color: rgba(255, 255, 255, 0.30)">

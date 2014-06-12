@@ -55,7 +55,7 @@ namespace Download.Models
         [Display(Name = "Product")]
         public string ProductName { get; set; }
         [Display(Name = "Version")]
-        public List<Version> Versions { get;set; }
+        public List<Version> Versions { get; set; }
         
     }
     public class AddVersionView

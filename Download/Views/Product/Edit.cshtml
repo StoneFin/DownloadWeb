@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Edit";
     var search = ViewData["search"];
+
 }
 
 <h2>Edit</h2>
@@ -15,6 +16,7 @@
         <hr />
         @Html.ValidationSummary(true)
         @Html.HiddenFor(model => model.ProductId)
+        @Html.HiddenFor(model => model.ProductStatus)
 
         <div class="form-group">
             @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
@@ -37,6 +39,9 @@
                 </th>
                 <th>
                     @Html.Encode("ReadMe")
+                </th>
+                <th>
+
                 </th>
                 </tr>
 @foreach (var version in Model.Versions)
@@ -80,7 +85,7 @@
 }
 
 <div >
-    <p class="tab">@Html.ActionLink("Back to List", "Index", new { searchString = search})</p>
+    <p class="tab">@Html.ActionLink("Back to List", "Index")</p>
 </div>
 
 @section Scripts {

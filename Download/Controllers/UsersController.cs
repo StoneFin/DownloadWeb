@@ -11,10 +11,11 @@ namespace Download.Controllers
     [Authorize(Roles = "admin")]
     public class UsersController : Controller
     {
-        //
+        //Shows all the users on a page
         // GET: /Users/
         public ActionResult Index()
         {
+            //add paging to the user index 
             List<UserViewModel> AllUsers = new List<UserViewModel>();
             
             List<ApplicationUser> users;
@@ -63,7 +64,7 @@ namespace Download.Controllers
         {
             return View();
         }
-
+        //NOT USED because creating a user is as easy as registering
         // POST: /Product/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -108,8 +109,10 @@ namespace Download.Controllers
             {
                 return HttpNotFound();
             }
-
+                //find all roles to be used in the drop down list in the view
             roles = db.Roles.ToList();
+                //find the current role of the selected use, put it at the beginning of the list so that
+                //the current role is the default selection of the dropdown lsit
             foreach (var role in User.Roles)
             {
                 roles.Remove(role.Role);
@@ -138,17 +141,19 @@ namespace Download.Controllers
             {
                 using (var db = new ApplicationDbContext())
                 {
+                    //Use Microsoft's User manager to handle the roles
                     var userStore = new UserStore<ApplicationUser>(db);
                     var userManager = new UserManager<ApplicationUser>(userStore);
                     var dbUser = db.Users.First(u => u.Id == User.Id);
 
                     dbUser.Email = User.Email;
                     dbUser.UserName = User.UserName;
-
+                    //If the user somehow has no roles, assign the seleted one and be done
                     if (dbUser.Roles.Count() == 0)
                     {
                         userManager.AddToRole(dbUser.Id, RoleName);
                     }
+                        //otherwise, in order to keep each user to only one role, remove all other roles, and add only the selected role
                     else
                     {
                         foreach (var role in dbUser.Roles)
@@ -172,7 +177,7 @@ namespace Download.Controllers
             }
             return View(User);
         }
-
+        //Used to Perminately delete a user
         //// GET: /Product/Delete/5
         public ActionResult Delete(string id)
         {
@@ -203,7 +208,7 @@ namespace Download.Controllers
             }
             return RedirectToAction("Index");
         }
-
+        //This was a default method that was created when I made the controller, I'm not sure what it does
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -214,6 +219,7 @@ namespace Download.Controllers
             }
             base.Dispose(disposing);
         }
+        //This Action handles the MakeMember button
         public ActionResult MakeMember(string id)
         {
             using (var db = new ApplicationDbContext())
@@ -247,6 +253,7 @@ namespace Download.Controllers
             }
             return RedirectToAction("Index");
         }
+        //This action handles the MakeAdmin button
         public ActionResult MakeAdmin(string id)
         {
             using (var db = new ApplicationDbContext())
@@ -280,6 +287,8 @@ namespace Download.Controllers
             }
             return RedirectToAction("Index");
         }
+        //This action demotes the user to a non-validated member, essentially deactivating thier account becuase non-vailidated members
+        //have the same permmissions and annonomous users
         public ActionResult Deactivate(string id)
         {
             using (var db = new ApplicationDbContext())
