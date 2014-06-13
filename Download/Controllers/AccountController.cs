@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
 using Download.Models;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace Download.Controllers
 {
@@ -108,7 +110,7 @@ namespace Download.Controllers
                         userManager.AddToRole(user.Id, "non-validated member");
                     }
                     await SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Product");
                 }
                 else
                 {
@@ -156,6 +158,7 @@ namespace Download.Controllers
                 : message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed."
                 : message == ManageMessageId.ChangeEmailSuccess ? "Your email has been changed."
                 : message == ManageMessageId.Error ? "An error has occurred."
+                : message == ManageMessageId.ChangeEmailFail ? "Invalid email address"
                 : "";
             ViewBag.HasLocalPassword = HasPassword();
             ViewBag.ReturnUrl = Url.Action("Manage");
@@ -173,19 +176,32 @@ namespace Download.Controllers
             ViewBag.HasLocalPassword = hasPassword;
             ViewBag.ReturnUrl = Url.Action("Manage");
             //if email is not null, then change the email to the given email
-            if (email != null)
-            {
-                using (var db = new ApplicationDbContext())
+
+            bool success = false;
+                if (System.Text.RegularExpressions.Regex.IsMatch(email, @"^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-‌​]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$") == true)
                 {
-                    user = db.Users.Find(User.Identity.GetUserId());
-                    user.Email = email;
-                    db.SaveChanges();
+                    using (var db = new ApplicationDbContext())
+                    {
+                        user = db.Users.Find(User.Identity.GetUserId());
+                        user.Email = email;
+                        db.SaveChanges();
+                        success = true;
+                    }
                 }
-            }
+            
             //If the change password form is blank, then the user only wanted to change thier email, so dislpaly success message
+            //Also check to see if it is has some basic email adress format
             if (model.ConfirmPassword == null && model.NewPassword == null && model.OldPassword == null)
             {
-                return RedirectToAction("Manage", new { Message = ManageMessageId.ChangeEmailSuccess });
+                if (success == true)
+                {
+                    return RedirectToAction("Manage", new { Message = ManageMessageId.ChangeEmailSuccess });
+                }
+                else
+                {
+                    return RedirectToAction("Manage", new { Message = ManageMessageId.ChangeEmailFail });
+
+                }
             }
                 //else the user wants to change thier password, and this is all default stuff
             else
@@ -342,7 +358,7 @@ namespace Download.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Product");
         }
 
         //
@@ -414,6 +430,7 @@ namespace Download.Controllers
             SetPasswordSuccess,
             RemoveLoginSuccess,
             ChangeEmailSuccess,
+            ChangeEmailFail,
             Error
         }
 

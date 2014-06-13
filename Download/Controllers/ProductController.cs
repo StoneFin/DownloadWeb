@@ -59,7 +59,7 @@ namespace Download.Controllers
             ViewData["search"] = searchString;
             List<Product> products = new List<Product>();
             //display 10 results per page
-            int pageSize = 2;
+            int pageSize = 10;
             //return the value of page from the view, if it's null return 1
             int pageNumber = (page ?? 1);
             //open database connection
@@ -71,14 +71,17 @@ namespace Download.Controllers
                 //blank search, return all products
                 if (searchString == "")
                 {
-                    products = db.Products.ToList();
+                    //Return all products in Alphabetical Order
+                    products = db.Products.OrderBy(p => p.ProductName).ToList();
+
                 }
                     //user entered a search, return matching products
                 else if (searchString != null)
                 {
                     //if the search string is not empty, then only return the matching products to the user
+                    //Return the search results in alphabetical order
                     Sproducts = Sproducts.Where(s => s.ProductName.Contains(searchString));
-                    products = Sproducts.ToList();
+                    products = Sproducts.OrderBy(p => p.ProductName).ToList();
                     page = 1;
                 }
                     //page was just initialized and display nothing
@@ -513,8 +516,8 @@ namespace Download.Controllers
                 var archives = db.Archives.ToList();
                 var allVersions = db.Versions.ToList();
                 product = db.Products.Find(id);
-                //grab only the visible versions becuase if a version is invisible, then it was removed by the admin
-                product.Versions = GetVisibleVersions(product.Versions.ToList());
+                //grab only the visible versions becuase if a version is invisible, then it was removed by the admin, and reverse it to show the most recent uploads first
+                product.Versions = GetVisibleVersions(product.Versions.Reverse().ToList());
                 foreach (var version in product.Versions)
                 {
                     //populate the list.  I found that if I did not do this, the product's versions and archives would be null

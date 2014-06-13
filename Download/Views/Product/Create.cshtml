@@ -15,36 +15,38 @@
     {
         @Html.AntiForgeryToken()
 
-        <div class="form-horizontal">
+
 
             <hr />
             @Html.ValidationSummary(true)
 
             <div class="form-group">
-                @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
+                @Html.Label("Product Name", new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
                     @Html.EditorFor(model => model.ProductName)
-                    @Html.ValidationMessageFor(model => model.ProductName)
+                    @Html.ValidationMessageFor(model => model.ProductName)<br /><br />
                 </div>
             </div>
-        </div>
+
         <div class="form-group">
+            @Html.Label("","Select a .exe" , new  { @class = "control-label col-md-2"})
             <fieldset>
-                <div class=" col-md-10; col-md-offset-2">
+                <div class=" col-md-10">
 
                     <p>
-                        Select an .exe: <input type="file" name="FileUpload1" />
+                    <input type="file" name="FileUpload1" />
                     </p>
                 </div>
             </fieldset>
         </div>
 
         <div class="form-group">
+            @Html.Label("Select an Installer", new { @class = "control-label col-md-2" })
             <fieldset>
-                <div class=" col-md-10; col-md-offset-2">
+                <div class=" col-md-10">
 
                     <p>
-                        Select an Installer: <input type="file" name="FileUpload2" />
+                       <input type="file" name="FileUpload2" />
                     </p>
                 </div>
             </fieldset>
@@ -52,11 +54,12 @@
         </div>
 
         <div class="form-group">
+            @Html.Label("Select a ReadMe", new { @class = "control-label col-md-2" })
             <fieldset>
-                <div class=" col-md-10; col-md-offset-2">
+                <div class=" col-md-10">
 
                     <p>
-                        Select a ReadMe: <input type="file" name="FileUpload3" />
+                       <input type="file" name="FileUpload3" />
                     </p>
                 </div>
             </fieldset>
@@ -73,12 +76,15 @@
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <br />
-                <input type="submit" value="Create" class="btn btn-default" /><br /><br />
-                @Html.ActionLink("Back to List", "Index") <br />
-            </div>
-        </div>
+                <input type="submit" value="Create" class="btn btn-default" /><br />
 
+            </div>
+           <hr />
+
+        </div>
+                     @Html.ActionLink("Back to List", "Index") <br />
     }
+
 
 @*Another Default thing*@
 
