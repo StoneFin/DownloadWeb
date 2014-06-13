@@ -178,6 +178,7 @@ namespace Download.Controllers
             //if email is not null, then change the email to the given email
 
             bool success = false;
+            //use the regular expression to check to see if it's a valid email address, if not, retun error message
                 if (System.Text.RegularExpressions.Regex.IsMatch(email, @"^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-‌​]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$") == true)
                 {
                     using (var db = new ApplicationDbContext())
