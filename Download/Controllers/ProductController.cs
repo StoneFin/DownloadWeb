@@ -88,17 +88,18 @@ namespace Download.Controllers
                 else
                 {
                 }
+                //call show only visible products to hide the products that were removed
+                products = ShowOnlyVisible(products);
                 //If there are no products in the database, display a blank Index
-                if (products.Count() == 0)
+                if (products.Count() == 0 && searchString != null)
                 {
-                    //call show only visible products to hide the products that were removed
-                    products = ShowOnlyVisible(products);
-                    //reutnr the ToPagedList to add paging to the display
+
+                    //return the ToPagedList to add paging to the display
+                    ViewBag.Message = "No Matches Found, Please try a different search";
                     return View(products.ToPagedList(pageNumber, pageSize));
                 }
 
             }
-            products = ShowOnlyVisible(products);
             return View(products.ToPagedList(pageNumber, pageSize));
         }
         //Not Used but kept just in case
@@ -366,9 +367,6 @@ namespace Download.Controllers
                     prod.Versions.Add(ProductVersion);
                     db.SaveChanges();
 
-
-
-
                 }
                 //return to the previous page
                 return RedirectToAction("Edit/" + version.ProductId.ToString());
@@ -490,9 +488,6 @@ namespace Download.Controllers
                     prod.Versions.Add(ProductVersion);
                     db.Products.Add(prod);
                     db.SaveChanges();
-
-
-
 
                 }
                 return RedirectToAction("Index");

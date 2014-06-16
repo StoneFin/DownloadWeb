@@ -57,13 +57,16 @@
             }
 
         </table>
+    <div class="text-danger">@ViewBag.Message</div>
         <br />
     @*Dispaly no pagers on intial display of the page becuase no products are shown*@
     @if(Model.PageCount > 0){
         <div>
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-
+    @*If there is zero or one page, no need to display page links*@
+    @if (Model.PageCount > 1) { 
     @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+    }
             </div>
     }
     </div>
