@@ -6,15 +6,22 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using PagedList;
+
 namespace Download.Controllers
 {
     [Authorize(Roles = "admin")]
     public class UsersController : Controller
     {
+
         //Shows all the users on a page
         // GET: /Users/
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
+            //display 10 results per page
+            int pageSize = 10;
+            //return the value of page from the view, if it's null return 1
+            int pageNumber = (page ?? 1);
             //add paging to the user index 
             List<UserViewModel> AllUsers = new List<UserViewModel>();
             
@@ -38,7 +45,7 @@ namespace Download.Controllers
 
             }
             
-            return View(AllUsers);
+            return View(AllUsers.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /Product/Details/5

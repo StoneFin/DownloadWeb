@@ -11,9 +11,11 @@
 
 <h2>@Model.ProductName</h2>
 <hr />
+@if (Model.Versions.Count() > 0) {
 <div style="background-color: rgba(255, 255, 255, 0.35); border: 2px solid #ffffff" class="body-content">
 
     <h3>Read Me</h3>
+
     <div class="col-md-12">
 
         @*Display the Markdown readme that was converted to html*@
@@ -107,6 +109,16 @@
             </div>
         </div>
     </div>
+}
+@if (User.IsInRole("admin") == true || User.IsInRole("member") == true)
+{
+<h3>@ViewBag.Message1</h3>
+}
+else 
+{ 
+@*Display another register teaser if they are not members yet*@
+<h3>@ViewBag.Message2</h3>
+}
 <br />
 <p>
     @Html.ActionLink("Back to List", "Index")

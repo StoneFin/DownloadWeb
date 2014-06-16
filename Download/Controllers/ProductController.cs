@@ -176,70 +176,78 @@ namespace Download.Controllers
                 md.ExtraMode = true;
                 //If another version was selected from the display view, display that particular version
                 string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(product.ProductId).ToString("D8") + "\\";
-                if (VersionId != null)
+                if (ProductModel.Versions.Count > 0)
                 {
-                    foreach (var version in ProductModel.Versions)
+                    if (VersionId != null)
                     {
-                        if (version.VersionId == VersionId)
+                        foreach (var version in ProductModel.Versions)
                         {
-                            //Remove the selected version and insert it at the beginning so it is displayed on the page
-                            ProductModel.Versions.Remove(version);
-                            ProductModel.Versions.Insert(0, version);
+                            if (version.VersionId == VersionId)
+                            {
+                                //Remove the selected version and insert it at the beginning so it is displayed on the page
+                                ProductModel.Versions.Remove(version);
+                                ProductModel.Versions.Insert(0, version);
 
+                                foreach (var arch in version.Archives)
+                                {
+
+                                    //grab the root path from web.config and append the specific extension to it
+                                    ArchiveIndex = arch.ArchiveId;
+                                    string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
+                                    try
+                                    {
+                                        var file = System.IO.File.ReadAllText(fileName);
+                                        ViewData["Content"] = md.Transform(file);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ViewData["Content"] = md.Transform("Could Not Find ReadMe");
+                                    }
+                                }
+                                break;
+                            }
+
+                        }
+                    }
+                    //If no version is selected, display the default version which is the most recently added version
+                    else
+                    {
+                        foreach (var version in ProductModel.Versions)
+                        {
                             foreach (var arch in version.Archives)
                             {
-
-                                //grab the root path from web.config and append the specific extension to it
-                                ArchiveIndex = arch.ArchiveId;
-                                string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
-                                try
+                                //if there is no readMe, display 'could no find readme'
+                                if (arch.ReadMe == null || arch.ReadMe == "")
                                 {
-                                    var file = System.IO.File.ReadAllText(fileName);
-                                    ViewData["Content"] = md.Transform(file);
+                                    ViewData["Content"] = md.Transform("Could not find ReadMe");
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    ViewData["Content"] = md.Transform("Could Not Find ReadMe");
+                                    //grab the index of the archive to find it in the server
+                                    ArchiveIndex = arch.ArchiveId;
+                                    string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
+                                    try
+                                    {
+                                        var file = System.IO.File.ReadAllText(fileName);
+                                        //convert the markdown readme into Html
+                                        ViewData["Content"] = md.Transform(file);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        ViewData["Content"] = md.Transform("Could not find ReadMe");
+                                    }
                                 }
+                                break;
                             }
                             break;
                         }
 
                     }
                 }
-                //If no version is selected, display the default version which is the most recently added version
                 else
                 {
-                    foreach (var version in ProductModel.Versions)
-                    {
-                        foreach (var arch in version.Archives)
-                        {
-                            //if there is no readMe, display 'could no find readme'
-                            if (arch.ReadMe == null || arch.ReadMe == "")
-                            {
-                                ViewData["Content"] = md.Transform("Could not find ReadMe");
-                            }
-                            else
-                            {
-                                //grab the index of the archive to find it in the server
-                                ArchiveIndex = arch.ArchiveId;
-                                string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
-                                try
-                                {
-                                    var file = System.IO.File.ReadAllText(fileName);
-                                    //convert the markdown readme into Html
-                                    ViewData["Content"] = md.Transform(file);
-                                }
-                                catch (Exception ex)
-                                {
-                                    ViewData["Content"] = md.Transform("Could not find ReadMe");
-                                }
-                            }
-                            break;
-                        }
-                        break;
-                    }
-
+                    ViewBag.Message1 = "No Versions Available";
+                    ViewBag.Message2 = "Register and get verified to gain acess to this product";
                 }
             }
 

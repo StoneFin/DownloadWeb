@@ -26,7 +26,7 @@
         </p>
         }
         </p>
-        <table class="table table-hover" style="background-color: #ffffff; border: 2px solid #ffffff">
+        <table class="table table-hover col-md-12" style="background-color: #ffffff; border: 2px solid #ffffff">
 
 
 
@@ -36,20 +36,20 @@
                 {
 
                     <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
-                        <td style="font-size: larger; font-style: initial">
+                        <td style="font-size: larger; font-style: initial" class="row">
                             @item.ProductName
                         </td>
-                        <td>
+                        <td class="row">
                             <input type="submit" value="Download" class="btn btn-primary" />
                         </td>
                         
                         @if (User.IsInRole("admin") == true)
-                        {
-                            <td>
-                                @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
-                                @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
-                            </td>
-                        }
+{
+    <td class="row">
+        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
+        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
+    </td>
+}
                         
                     </tr>
                 }
