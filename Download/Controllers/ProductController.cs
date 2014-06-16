@@ -250,8 +250,12 @@ namespace Download.Controllers
                     ViewBag.Message2 = "Register and get verified to gain acess to this product";
                 }
             }
-
-
+            //check to see if there is an error message
+            if (TempData["message"] != null)
+            {
+                //if there is, pass it into the view
+                ViewBag.Message = TempData["message"].ToString();
+            }
 
             if (product == null)
             {
@@ -349,7 +353,7 @@ namespace Download.Controllers
                                 var path = Path.Combine(filePath, fileName);
                                 Request.Files[file].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                //if there still is no version, try to grap it out of the installer
+                                //if there still is no version, try to grab it out of the installer
                                 if (ProductVersion.VersionName == null)
                                 {
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
@@ -879,7 +883,8 @@ namespace Download.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Message = "Error, could not find file";
+                //error message for file not found
+                TempData["message"] = "Error, could not find file " + fileName;
                 //if there was an error, then redirect to the same page
                 return RedirectToAction("Display/" + id.ToString());
             }

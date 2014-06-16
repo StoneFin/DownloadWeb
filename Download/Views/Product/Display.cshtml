@@ -45,7 +45,7 @@
     </dl>
         break;
     }
-
+    <div class="text-danger">@ViewBag.Message</div>
     <div class="md-col-2">
         @foreach (var version in Model.Versions)
         {
@@ -58,7 +58,6 @@
                 {
                             <input type="submit" value= "Download Installer" class="btn btn-primary" />
                 }
-                        @ViewBag.Message
                 }
             }
             break;
@@ -76,7 +75,6 @@
                 {
                         <input type="submit" value= "Download Exe" class="btn btn-primary" />
                 }
-                        @ViewBag.Message
                 }
             }
             break;
