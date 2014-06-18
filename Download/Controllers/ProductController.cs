@@ -20,48 +20,31 @@ namespace Download.Controllers
     public class ProductController : Controller
     {
         //class that saves the search and page number so the back to list links return the user to where they left off
-        public class SaveInfo
-        {
-            public static int? page;
-            public static string search;
-        }
+
 
         [AllowAnonymous]
         // GET: /Product/
         public ActionResult Index(string searchString, int? page)
         {
-            //if null, then check to see if there is any data in the saved search
-            if (searchString == null)
+
+
+            if (searchString == "")
             {
-                searchString = SaveInfo.search;
+                ViewData["search"] = " ";
             }
-                //if they are the same, the the user re-typed the same seach, and redirect back to page one
-            else if(searchString == SaveInfo.search)
-            {
-                page = 1;
-            }
-                //The user entered a new search, start out on page one
             else
             {
-                SaveInfo.search = searchString;
-                page = 1;
+                ViewData["search"] = searchString;
             }
-            //if page is null, then check to see if there is a saved page
-            if (page == null)
-            {
-                page = SaveInfo.page;
-            }
-                //else display selected page and save the page
-            else
-            {
-                SaveInfo.page = page;
-            }
-            ViewData["search"] = searchString;
             List<Product> products = new List<Product>();
             //display 10 results per page
-            int pageSize = 10;
+            int pageSize = 2;
             //return the value of page from the view, if it's null return 1
             int pageNumber = (page ?? 1);
+            if (pageNumber == 0)
+            {
+                pageNumber = 1;
+            }
             //open database connection
             using (var db = new ProductDBContext())
             {
@@ -69,7 +52,7 @@ namespace Download.Controllers
                 var Sproducts = from p in db.Products
                                 select p;
                 //blank search, return all products
-                if (searchString == "")
+                if (searchString == "" || searchString == " ")
                 {
                     //Return all products in Alphabetical Order
                     products = db.Products.OrderBy(p => p.ProductName).ToList();
@@ -88,8 +71,8 @@ namespace Download.Controllers
                 else
                 {
                 }
-                //call show only visible products to hide the products that were removed
-                products = ShowOnlyVisible(products);
+                //Show only the visible products
+                products = products.Where(x => x.ProductStatus > 0).ToList();
                 //If there are no products in the database, display a blank Index
                 if (products.Count() == 0 && searchString != null)
                 {
@@ -100,6 +83,7 @@ namespace Download.Controllers
                 }
 
             }
+            ViewData["page"] = pageNumber;
             return View(products.ToPagedList(pageNumber, pageSize));
         }
         //Not Used but kept just in case
@@ -139,10 +123,11 @@ namespace Download.Controllers
         [AllowAnonymous]
         // GET: /Product/Display/5
         //Displays a product's readme, and links for downloading
-        public ActionResult Display(int? id, int? VersionId)
+        public ActionResult Display(int? id, int? VersionId, string searchString, int? page)
         {
-
-
+            ViewData["page"] = page;
+            ViewData["search"] = searchString;
+            
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -153,6 +138,10 @@ namespace Download.Controllers
             using (var db = new ProductDBContext())
             {
                 product = db.Products.Find(id);
+                if (product == null)
+                {
+                    return HttpNotFound();
+                }
                 int ArchiveIndex = 0;
                 //If a user somehow figured out the id of a hidden
                 //product and types it into the url
@@ -278,6 +267,10 @@ namespace Download.Controllers
             {
                 product = db.Products.Find(id);
             }
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
             version.ProductName = product.ProductName;
             version.ProductId = product.ProductId;
             return View(version);
@@ -309,6 +302,7 @@ namespace Download.Controllers
                             if (fileName.Contains(".exe"))
                             {
                                 ProductArchive.Exe = fileName;
+                                //If the Directory doesn't exist, create it
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -388,8 +382,10 @@ namespace Download.Controllers
         }
 
         // GET: /Product/Create
-        public ActionResult Create()
+        public ActionResult Create(string searchString, int? page)
         {
+            ViewData["page"] = page;
+            ViewData["search"] = searchString;
             //populate the permissions drop down list with either public or private
             List<SelectListItem> per = new List<SelectListItem>();
             per.Add(new SelectListItem { Text = "Public", Value = "2" });
@@ -404,8 +400,9 @@ namespace Download.Controllers
         [HttpPost]
         [AcceptVerbs(HttpVerbs.Post)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ProductId,ProductName,ProductStatus")] ProductCreateView product, string VStatus)
+        public ActionResult Create([Bind(Include = "ProductId,ProductName,ProductStatus")] ProductCreateView product, string VStatus, string searchString, int? page)
         {
+
             //refer to the comments of AddVersion to see how most of this works
             if (ModelState.IsValid)
             {
@@ -502,15 +499,17 @@ namespace Download.Controllers
                     db.SaveChanges();
 
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { searchString = searchString, page = page });
             }
 
             return View(product);
         }
 
         // GET: /Product/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int? id, string searchString, int? page)
         {
+            ViewData["page"] = page;
+            ViewData["search"] = searchString;
 
             if (id == null)
             {
@@ -523,6 +522,10 @@ namespace Download.Controllers
                 var archives = db.Archives.ToList();
                 var allVersions = db.Versions.ToList();
                 product = db.Products.Find(id);
+                if (product == null)
+                {
+                    return HttpNotFound();
+                }
                 //grab only the visible versions becuase if a version is invisible, then it was removed by the admin, and reverse it to show the most recent uploads first
                 product.Versions = GetVisibleVersions(product.Versions.Reverse().ToList());
                 foreach (var version in product.Versions)
@@ -535,10 +538,7 @@ namespace Download.Controllers
                 }
 
             }
-            if (product == null)
-            {
-                return HttpNotFound();
-            }
+
             return View(product);
         }
 
@@ -547,8 +547,9 @@ namespace Download.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ProductId,ProductName,ProductStatus")] Product product)
+        public ActionResult Edit([Bind(Include = "ProductId,ProductName,ProductStatus")] Product product, string searchString, int? page)
         {
+
             if (ModelState.IsValid)
             {
                 using (var db = new ProductDBContext())
@@ -556,7 +557,7 @@ namespace Download.Controllers
                     db.Entry(product).State = EntityState.Modified;
                     db.SaveChanges();
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { searchString = searchString, page = page });
             }
             return View(product);
         }
@@ -575,6 +576,10 @@ namespace Download.Controllers
                 var archives = db.Archives.ToList();
                 var allVersions = db.Versions.ToList();
                 version = db.Versions.Find(id);
+                if (version == null)
+                {
+                    return HttpNotFound();
+                }
 
                 foreach (var arch in version.Archives)
                 {
@@ -583,10 +588,7 @@ namespace Download.Controllers
 
 
             }
-            if (version == null)
-            {
-                return HttpNotFound();
-            }
+
             List<SelectListItem> per = new List<SelectListItem>();
             //Check to see what current status is, and populate the list so
             //the current one is shown first
@@ -748,8 +750,10 @@ namespace Download.Controllers
         }
         //Hides the product from being seen by all users, without actually deleting it
         // GET: /Product/Remove/5
-        public ActionResult Remove(int? id)
+        public ActionResult Remove(int? id, string searchString, int? page)
         {
+            ViewData["page"] = page;
+            ViewData["search"] = searchString;
 
             if (id == null)
             {
@@ -770,7 +774,7 @@ namespace Download.Controllers
         // POST: /Product/Remove/5
         [HttpPost, ActionName("Remove")]
         [ValidateAntiForgeryToken]
-        public ActionResult RemoveConfirmed(int id)
+        public ActionResult RemoveConfirmed(int id, string searchString, int? page)
         {
 
             Product product;
@@ -781,7 +785,7 @@ namespace Download.Controllers
                 product.ProductStatus = 0;
                 db.SaveChanges();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { searchString = searchString, page = page });
         }
         //Hides a specified version from all users, without actually deleting it
         // GET: /Product/RemoveVersion/5
@@ -906,18 +910,7 @@ namespace Download.Controllers
         }
         //This method return a product list of visible products, e.g., if thier
         //Status number is 1
-        public List<Product> ShowOnlyVisible(List<Product> products)
-        {
-            List<Product> visible = new List<Product>();
-            foreach (var product in products)
-            {
-                if (product.ProductStatus > 0)
-                {
-                    visible.Add(product);
-                }
-            }
-            return visible;
-        }
+
         //This method figures out which versions should be hidden and which should be available to certain users
         public List<Models.Version> GetVisibleVersions(List<Models.Version> versions)
         {

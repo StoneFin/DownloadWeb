@@ -61,7 +61,7 @@ namespace Download.Controllers
                     }
                     catch(Exception ex)
                     {
-                        //If none can be found, give the usermanager an invalide username to throw an error
+                        //If none can be found, give the usermanager an invalid username to throw an error
                         LogUser = " ";
                     }
                 }
@@ -73,7 +73,7 @@ namespace Download.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Invalid username or password.");
+                    ModelState.AddModelError("", "Invalid email or password.");
                 }
             }
 

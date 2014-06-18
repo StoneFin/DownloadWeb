@@ -8,31 +8,36 @@
 
 
 <h2>Add Version</h2>
-
+<div style="background-color: rgba(255, 255, 255, 0.25); border: 2px solid #ffffff" class="form-horizontal">
     @using (Html.BeginForm("AddVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
 
-        <div class="form-horizontal">
+        <div class="form-group">
             <h4>@Model.ProductName</h4>
             <hr />
             @Html.ValidationSummary(true)
             @Html.HiddenFor(model => model.ProductId) 
         </div>
         <div class="form-group">
-                <fieldset>
-                    <div class=" col-md-10; col-md-offset-2">
-                        <p>
-                            Select an .exe: <input type="file" name="FileUpload1" />
-                        </p>
-                    </div>
-                </fieldset>
-            </div>
-        <div class="form-group">
+            @Html.Label("","Select a .exe" , new  { @class = "control-label col-md-2"})
             <fieldset>
-                <div class=" col-md-10; col-md-offset-2">
+                <div class=" col-md-10">
+
                     <p>
-                        Select an Installer: <input type="file" name="FileUpload2" />
+                    <input type="file" name="FileUpload1" />
+                    </p>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Select an Installer", new { @class = "control-label col-md-2" })
+            <fieldset>
+                <div class=" col-md-10">
+
+                    <p>
+                       <input type="file" name="FileUpload2" />
                     </p>
                 </div>
             </fieldset>
@@ -40,10 +45,12 @@
         </div>
 
         <div class="form-group">
+            @Html.Label("Select a ReadMe", new { @class = "control-label col-md-2" })
             <fieldset>
-                <div class=" col-md-10; col-md-offset-2">
+                <div class=" col-md-10">
+
                     <p>
-                        Select a ReadMe: <input type="file" name="FileUpload3" />
+                       <input type="file" name="FileUpload3" />
                     </p>
                 </div>
             </fieldset>
@@ -60,9 +67,12 @@
             <div class="col-md-offset-2 col-md-10">
                 <br />
                 <input type="submit" value="Add Version" class="btn btn-default" /><br /><br />
-                @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+
             </div>
         </div>
 
 
     }
+    @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+</div>
+

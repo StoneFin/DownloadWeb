@@ -5,23 +5,23 @@
 @{
     ViewBag.Title = "_SearchPartial";
     //this allows to view to see what was previously typed into the search bar
-    var search = ViewData["search"];
 
-
-
+    var search = ViewData["search"]; 
+    var pageNum = ViewData["page"];
+    
 }
 <div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
 
     <p>
         @if (User.IsInRole("admin"))
         {
-            @Html.ActionLink("Create New", "Create", new { searchString = search })
+            <h4>@Html.ActionLink("Create New", "Create", new { searchString = search, page = pageNum })</h4>
         }
-        @using (Html.BeginForm())
+        @using (Html.BeginForm(new { page = 1 }))
         {
         <p>
             @*The default text in the search bar is the text from the last search*@
-            <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete ="on" })
+            <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
             <input type="submit" value="Search" class="btn btn-info" />
         </p>
         }
@@ -32,7 +32,7 @@
 
             @foreach (var item in Model)
             {
-                using (Html.BeginForm("Display", "Product", new { id = item.ProductId}))
+                using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum}))
                 {
 
                     <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
@@ -46,8 +46,8 @@
                         @if (User.IsInRole("admin") == true)
 {
     <td class="row">
-        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
-        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId })
+        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }) |
+        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum })
     </td>
 }
                         
@@ -65,7 +65,7 @@
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
     @*If there is zero or one page, no need to display page links*@
     @if (Model.PageCount > 1) { 
-    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page, searchString = search }))
     }
             </div>
     }
