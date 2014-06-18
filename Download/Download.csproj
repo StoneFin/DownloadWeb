@@ -195,6 +195,10 @@
     <Compile Include="MigrationData\ProductMigrations\201406111625273_Adding Status Columns.Designer.cs">
       <DependentUpon>201406111625273_Adding Status Columns.cs</DependentUpon>
     </Compile>
+    <Compile Include="MigrationData\ProductMigrations\201406181959364_Adding ExtraFiles Class.cs" />
+    <Compile Include="MigrationData\ProductMigrations\201406181959364_Adding ExtraFiles Class.Designer.cs">
+      <DependentUpon>201406181959364_Adding ExtraFiles Class.cs</DependentUpon>
+    </Compile>
     <Compile Include="MigrationData\ProductMigrations\Configuration.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.Designer.cs">
@@ -325,6 +329,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\ProductMigrations\201406111625273_Adding Status Columns.resx">
       <DependentUpon>201406111625273_Adding Status Columns.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MigrationData\ProductMigrations\201406181959364_Adding ExtraFiles Class.resx">
+      <DependentUpon>201406181959364_Adding ExtraFiles Class.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\UserMigrations\201406102204488_InitialCreate.resx">
       <DependentUpon>201406102204488_InitialCreate.cs</DependentUpon>

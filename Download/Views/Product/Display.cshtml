@@ -76,6 +76,25 @@
         }
         <br />
     </div>
+    @*
+    <div class="md-col-2">
+        @foreach (var version in Model.Versions)
+        {
+            foreach (var arch in version.Archives)
+            {
+                if (arch.ExtraFiles != null)
+                {
+                    @Html.DisplayFor(model => arch.ExtraFiles)
+                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, archId = arch.ArchiveId }))
+                    {
+                        <input type="submit" value="Download Exe" class="btn btn-primary" />
+                    }
+                }
+            }
+            break;
+        }
+        <br />
+    </div> *@
     <div>
         @*If there is more than just the version being shown up above, display links to the additional versions*@
         @if (Model.Versions.Count() > 1)

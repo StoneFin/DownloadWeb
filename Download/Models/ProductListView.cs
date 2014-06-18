@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace Download.Models
 {
-    public class ProductListView : GetMostRecentVersion
+    public class ProductListView
     {
         public ProductListView()
         {
@@ -44,6 +44,7 @@ namespace Download.Models
         public string Exe { get; set; }
         public int ProductStatus { get; set; }
         public int VersionStatus { get; set; }
+        public string ExtraFiles { get; set; }
     }
     public class ProductDisplayView
     {

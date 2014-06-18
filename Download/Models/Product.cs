@@ -33,6 +33,7 @@ namespace Download.Models
             public ICollection<Archive> Archives { get; set; }
             public Version(){
                 Archives = new List<Archive>();
+                ExtraFiles = new List<ExtraFile>();
             }
             public int ProductId { get; set; }
             public virtual Product Product { get; set; }
@@ -40,6 +41,7 @@ namespace Download.Models
             public DateTimeOffset DateCreated { get; set; }
             [Required]
             public int VersionStatus { get; set; }
+            public virtual ICollection<ExtraFile> ExtraFiles { get; set; }
 
  
 
@@ -47,31 +49,30 @@ namespace Download.Models
         public class Archive
         {
 
+
             public virtual Version Version { get; set; }
             public int VersionId { get; set; }
             public int ArchiveId { get; set; }
             public string Installer { get; set; }
             public string Exe { get; set; }
             public string ReadMe { get; set; }
+
            [DataType(DataType.Date)]
            public DateTimeOffset DateUploaded { get; set; }
+
         }
-        public class GetMostRecentVersion
+        public class ExtraFile
         {
-            public Version GetMostRecenVersion(System.Collections.Generic.List<Version> versions)
+            public ExtraFile()
             {
-                Version MostRecent = new Version();
-                MostRecent = versions[0];
-                foreach (var version in versions)
-                {
-                    if (MostRecent.VersionName.CompareTo(version.VersionName) < 0)
-                    {
-                        MostRecent = version;
-                    }
-                }
-                return MostRecent;
+                Versions = new List<Version>();
             }
+            public virtual ICollection<Version> Versions { get; set; }
+            public int ExtraFileId { get; set; }
+            public string FileName { get; set; }
+            public string FileDescription { get; set; }
         }
+
     
    
     public class ProductDBContext : DbContext

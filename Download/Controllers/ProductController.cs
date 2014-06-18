@@ -58,7 +58,7 @@ namespace Download.Controllers
                     products = db.Products.OrderBy(p => p.ProductName).ToList();
 
                 }
-                    //user entered a search, return matching products
+                //user entered a search, return matching products
                 else if (searchString != null)
                 {
                     //if the search string is not empty, then only return the matching products to the user
@@ -67,7 +67,7 @@ namespace Download.Controllers
                     products = Sproducts.OrderBy(p => p.ProductName).ToList();
                     page = 1;
                 }
-                    //page was just initialized and display nothing
+                //page was just initialized and display nothing
                 else
                 {
                 }
@@ -127,7 +127,7 @@ namespace Download.Controllers
         {
             ViewData["page"] = page;
             ViewData["search"] = searchString;
-            
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -192,6 +192,10 @@ namespace Download.Controllers
                                     {
                                         ViewData["Content"] = md.Transform("Could Not Find ReadMe");
                                     }
+                                    //if (arch.ExtraFiles != null)
+                                    //{
+                                    //    string[] ExFiles = arch.ExtraFiles.Split(',');
+                                    //}
                                 }
                                 break;
                             }
@@ -226,6 +230,10 @@ namespace Download.Controllers
                                         ViewData["Content"] = md.Transform("Could not find ReadMe");
                                     }
                                 }
+                                //if (arch.ExtraFiles != null)
+                                //{
+                                // string[] ExFiles = arch.ExtraFiles.Split(',');
+                                //}
                                 break;
                             }
                             break;
@@ -250,6 +258,7 @@ namespace Download.Controllers
             {
                 return HttpNotFound();
             }
+            // ViewData["ExFiles"] = ExFiles;
             return View(ProductModel);
 
         }
@@ -421,14 +430,36 @@ namespace Download.Controllers
                     Models.Archive ProductArchive = new Models.Archive();
                     Models.Version ProductVersion = new Models.Version();
 
+
                     //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
                     string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex((LastProduct.ProductId + 1)).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
-                    foreach (string file in Request.Files)
+                    foreach (string FileName in Request.Files)
                     {
+                        var fileName = Request.Files[FileName].FileName;
                         try
                         {
-                            var fileName = Request.Files[file].FileName;
-                            if (fileName.Contains(".exe"))
+                            if (FileName == "FileUpload4")
+                            {
+                            var uploadFiles = Request.Files.GetMultiple(FileName);
+                            foreach (var file in uploadFiles) { 
+                                fileName = file.FileName;
+
+                                Models.ExtraFile ProductExFiles = new Models.ExtraFile();
+                                ProductExFiles.FileName = fileName;
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
+                                fileName = CurrArchId + fileName;
+                                var path = Path.Combine(filePath, fileName);
+                                file.SaveAs(path);
+                                ProductExFiles.Versions.Add(ProductVersion);
+                                ProductVersion.ExtraFiles.Add(ProductExFiles);
+
+
+                            }
+                            }
+                            else if (fileName.Contains(".exe"))
                             {
                                 ProductArchive.Exe = fileName;
                                 if (!Directory.Exists(filePath))
@@ -437,7 +468,7 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
                             }
@@ -450,7 +481,7 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
@@ -470,26 +501,31 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
                                 }
                             }
-
-
+                        
                         }
+
+                        
 
                         catch (Exception ex)
                         {
                             ViewBag.Message = "No files chosen";
                         }
+                    
+
+                        if (ProductVersion.VersionName == null)
+                        {
+                            ProductVersion.VersionName = "No info";
+                        }
+
                     }
-                    if (ProductVersion.VersionName == null)
-                    {
-                        ProductVersion.VersionName = "No info";
-                    }
+
                     ProductArchive.DateUploaded = DateTime.Now;
                     ProductVersion.Archives.Add(ProductArchive);
                     ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
@@ -927,8 +963,8 @@ namespace Download.Controllers
                 }
                 return Vversions;
             }
-                //if they are not a member or admin, then they are either an annonomous user, or a non-validated member, both of wich have the same permissions
-                //to view public files, whos VersionStatus number is 2.
+            //if they are not a member or admin, then they are either an annonomous user, or a non-validated member, both of wich have the same permissions
+            //to view public files, whos VersionStatus number is 2.
             else
             {
                 foreach (var vers in versions)
@@ -946,5 +982,5 @@ namespace Download.Controllers
 
 
 }
-    
+
 
