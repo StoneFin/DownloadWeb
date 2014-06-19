@@ -1,0 +1,43 @@
+﻿@model Download.Models.Version
+
+@{
+    ViewBag.Title = "Description";
+    var search = ViewData["search"];
+    var pageNum = ViewData["page"];
+    int i = 0;
+}
+
+<h2>Add Descriptions</h2>
+<div class="clearfix">
+    @using (Html.BeginForm("Description", "Product", FormMethod.Post, new { searchString = search, page = pageNum }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.VersionId)
+
+
+
+        foreach (var item in Model.ExtraFiles)
+        {
+            if (item.FileDescription == null)
+            {
+                <div class="form-group clearfix">
+                    <div class="col-md-2">
+                        <b>@item.FileName</b>
+                    </div>
+                    <div class="col-md-8">
+                        @Html.TextArea("Description[" + i.ToString() + "]",item.FileDescription, new { @style = "width: 300px; height: 75px" })
+                    </div>
+
+                </div>
+                i++;
+            }
+            else
+            {
+                i++;
+            }
+        }
+        @Html.HiddenFor(model => model.ExtraFiles);
+        <input type="submit" value="Create" class="btn btn-default" />
+    }
+</div>

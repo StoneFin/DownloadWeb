@@ -80,6 +80,7 @@ namespace Download.Models
         public DbSet<Product> Products { get; set; }
         public DbSet<Version> Versions { get; set; }
         public DbSet<Archive> Archives { get; set; }
+        public DbSet<ExtraFile> ExtraFiles { get; set; }
 
     }
 

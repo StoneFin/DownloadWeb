@@ -42,6 +42,9 @@
                     @Html.Encode("ReadMe")
                 </th>
                 <th>
+                    @Html.Encode("Extra Files")
+                </th>
+                <th>
 
                 </th>
                 </tr>
@@ -62,6 +65,16 @@
             </td>
             <td>
                 @arch.ReadMe
+            </td>
+        }
+        @if (version.ExtraFiles != null) { 
+        <td>
+        @foreach (var ex in version.ExtraFiles)
+        {
+            
+                @ex.FileName<br />
+            
+        }
             </td>
         }
         <td>

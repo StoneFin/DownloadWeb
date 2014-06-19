@@ -73,5 +73,6 @@ namespace Download.Models
         public int VersionStatus { get; set; }
  
     }
+
     
 }

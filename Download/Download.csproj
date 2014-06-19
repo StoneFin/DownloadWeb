@@ -199,6 +199,10 @@
     <Compile Include="MigrationData\ProductMigrations\201406181959364_Adding ExtraFiles Class.Designer.cs">
       <DependentUpon>201406181959364_Adding ExtraFiles Class.cs</DependentUpon>
     </Compile>
+    <Compile Include="MigrationData\ProductMigrations\201406191406239_Added DbSet For ExFiles.cs" />
+    <Compile Include="MigrationData\ProductMigrations\201406191406239_Added DbSet For ExFiles.Designer.cs">
+      <DependentUpon>201406191406239_Added DbSet For ExFiles.cs</DependentUpon>
+    </Compile>
     <Compile Include="MigrationData\ProductMigrations\Configuration.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.Designer.cs">
@@ -262,6 +266,7 @@
     <Content Include="Views\Product\_SearchPartial.cshtml" />
     <Content Include="Views\Product\Remove.cshtml" />
     <Content Include="Views\Product\RemoveVersion.cshtml" />
+    <Content Include="Views\Product\Description.cshtml" />
     <None Include="Views\Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.js" />
     <Content Include="Views\Scripts\jquery-1.10.2.min.js" />
@@ -332,6 +337,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\ProductMigrations\201406181959364_Adding ExtraFiles Class.resx">
       <DependentUpon>201406181959364_Adding ExtraFiles Class.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MigrationData\ProductMigrations\201406191406239_Added DbSet For ExFiles.resx">
+      <DependentUpon>201406191406239_Added DbSet For ExFiles.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\UserMigrations\201406102204488_InitialCreate.resx">
       <DependentUpon>201406102204488_InitialCreate.cs</DependentUpon>

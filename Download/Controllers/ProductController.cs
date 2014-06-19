@@ -164,7 +164,7 @@ namespace Download.Controllers
                 md.SafeMode = true;
                 md.ExtraMode = true;
                 //If another version was selected from the display view, display that particular version
-                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(product.ProductId).ToString("D8") + "\\";
+                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(product.ProductId).ToString("D8") + "\\";
                 if (ProductModel.Versions.Count > 0)
                 {
                     if (VersionId != null)
@@ -182,7 +182,7 @@ namespace Download.Controllers
 
                                     //grab the root path from web.config and append the specific extension to it
                                     ArchiveIndex = arch.ArchiveId;
-                                    string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
+                                    string fileName = filePath + GetVersionIndex(version.VersionId).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
                                     try
                                     {
                                         var file = System.IO.File.ReadAllText(fileName);
@@ -218,7 +218,7 @@ namespace Download.Controllers
                                 {
                                     //grab the index of the archive to find it in the server
                                     ArchiveIndex = arch.ArchiveId;
-                                    string fileName = filePath + GetIndex(ArchiveIndex).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
+                                    string fileName = filePath + GetVersionIndex(version.VersionId).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
                                     try
                                     {
                                         var file = System.IO.File.ReadAllText(fileName);
@@ -296,13 +296,15 @@ namespace Download.Controllers
                 {
                     //find the last archive's id number to anticipate the added archive's id before it is added to the database
                     var LastArchive = db.Archives.ToList().Last();
+                    var LastVersion = db.Versions.ToList().Last();
                     //add one to the last archive id to get this archvie Id before it is put in the database
                     //This string appends the archive Id in front of the name to allow for easy access in the directories
                     string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
-                    int ArchIndex = LastArchive.ArchiveId + 1;
+                    int VerIndex = LastVersion.VersionId + 1;
+
                     prod = db.Products.Find(version.ProductId);
                     //Add the files and extract the version from the file, with the version extracted from the .exe given the highest priority
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(prod.ProductId).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
+                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(prod.ProductId).ToString("D8") + "\\" + GetVersionIndex(VerIndex).ToString("D8") + "\\";
                     foreach (string file in Request.Files)
                     {
                         try
@@ -415,6 +417,8 @@ namespace Download.Controllers
             //refer to the comments of AddVersion to see how most of this works
             if (ModelState.IsValid)
             {
+                int CurrVerId = 0;
+                bool ExFileFlag = false;
 
                 using (var db = new ProductDBContext())
                 {
@@ -423,41 +427,57 @@ namespace Download.Controllers
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
                     var LastArchive = db.Archives.ToList().Last();
-                    int ArchIndex = LastArchive.ArchiveId + 1;
+                    var LastVersion = db.Versions.ToList().Last();
+                    CurrVerId = LastVersion.VersionId + 1;
                     //add one to the last archive id to get this archvie Id before it is put in the database
                     string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
+ 
                     prod.ProductStatus = 1;
                     Models.Archive ProductArchive = new Models.Archive();
                     Models.Version ProductVersion = new Models.Version();
 
 
                     //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex((LastProduct.ProductId + 1)).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
+                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex((LastProduct.ProductId + 1)).ToString("D8") + "\\" + GetVersionIndex(CurrVerId).ToString("D8") + "\\";
+                    int i = 0;
+
                     foreach (string FileName in Request.Files)
                     {
                         var fileName = Request.Files[FileName].FileName;
                         try
                         {
+                            //Due to the way the multiple file upload works, there are multiple FileNames with 'FileUpload4'. However, each 'FileUpload4' contains all
+                            //of the multiple selected files, and the result of iterating over them without breaking after one pass would be uploading the 
+                            //number of files selected squared.
                             if (FileName == "FileUpload4")
                             {
-                            var uploadFiles = Request.Files.GetMultiple(FileName);
-                            foreach (var file in uploadFiles) { 
-                                fileName = file.FileName;
-
-                                Models.ExtraFile ProductExFiles = new Models.ExtraFile();
-                                ProductExFiles.FileName = fileName;
-                                if (!Directory.Exists(filePath))
+                                //Nest the check inside the 'FileUpload4' check so that the else at the end if the first if statement doesn't 
+                                //get executed
+                                ExFileFlag = true;
+                                if (i < 1)
                                 {
-                                    Directory.CreateDirectory(filePath);
+                                    var LastExFile = db.ExtraFiles.ToList().Last();
+                                    string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
+                                    var uploadFiles = Request.Files.GetMultiple(FileName);
+                                    foreach (var file in uploadFiles)
+                                    {
+                                        fileName = file.FileName;
+                                        Models.ExtraFile ProductExFiles = new Models.ExtraFile();
+                                        ProductExFiles.FileName = fileName;
+                                        if (!Directory.Exists(filePath))
+                                        {
+                                            Directory.CreateDirectory(filePath);
+                                        }
+                                        fileName = CurrExId + fileName;
+                                        var path = Path.Combine(filePath, fileName);
+                                        file.SaveAs(path);
+                                        ProductExFiles.Versions.Add(ProductVersion);
+                                        ProductVersion.ExtraFiles.Add(ProductExFiles);
+                                        i++;
+                                    }
+
+
                                 }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
-                                file.SaveAs(path);
-                                ProductExFiles.Versions.Add(ProductVersion);
-                                ProductVersion.ExtraFiles.Add(ProductExFiles);
-
-
-                            }
                             }
                             else if (fileName.Contains(".exe"))
                             {
@@ -508,16 +528,13 @@ namespace Download.Controllers
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
                                 }
                             }
-                        
+
                         }
-
-                        
-
                         catch (Exception ex)
                         {
                             ViewBag.Message = "No files chosen";
                         }
-                    
+
 
                         if (ProductVersion.VersionName == null)
                         {
@@ -534,11 +551,70 @@ namespace Download.Controllers
                     db.Products.Add(prod);
                     db.SaveChanges();
 
+
                 }
-                return RedirectToAction("Index", new { searchString = searchString, page = page });
+                if (ExFileFlag == true && CurrVerId != 0)
+                {
+                    return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page });
+                }
+                else
+                {
+                    return RedirectToAction("Index", new { searchString = searchString, page = page });
+                }
             }
 
+
             return View(product);
+        }
+        //GET: /Product/Description/5
+        public ActionResult Description(int? id, string searchString, int? page)
+        {
+            if (id == null)
+            {
+              return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            ViewData["page"] = page;
+            ViewData["search"] = searchString;
+            List<ExtraFile> ExFiles = new List<ExtraFile>();
+            Models.Version version = new Models.Version();
+            using (var db = new ProductDBContext())
+            {
+                version = db.Versions.Find(id);
+                foreach (var ex in version.ExtraFiles)
+                {
+                    ExFiles.Add(ex);
+                }
+            }
+            return View(version);
+        }
+        //POST: /Product/Description/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Description([Bind(Include = "VersionId")] Models.Version Version, string searchString, int? page, string[] Description)
+        {
+
+            ExtraFile ExFiles = new ExtraFile();
+            using (var db = new ProductDBContext())
+            {
+                var version = db.Versions.Find(Version.VersionId);
+                Debug.Assert(Description.Count() == version.ExtraFiles.Count);                
+                int i = 0;
+                foreach (var ex in version.ExtraFiles)
+                {
+                    ex.FileDescription = Description[i];
+                    i++;
+
+                }
+                db.SaveChanges();
+            }
+            //If this is true, then we are coming from the edit version, in which case we want to redirect back to
+            // the edit controller
+            if (searchString == null && page == null)
+            {
+                return RedirectToAction("Edit/" + Version.VersionId.ToString());
+            }else{
+            return RedirectToAction("Index", new { searchString = searchString, page = page });
+            }
         }
 
         // GET: /Product/Edit/5
@@ -555,8 +631,13 @@ namespace Download.Controllers
             using (var db = new ProductDBContext())
             {
                 //populate the archives and versions so the product can find the corresponding versions and archives
-                var archives = db.Archives.ToList();
-                var allVersions = db.Versions.ToList();
+                var AllArchives = (from v in db.Versions
+                                   join p in db.Products on v.ProductId equals p.ProductId
+                                   where p.ProductId == (int)id
+                                   select v.Archives).ToList();
+
+                var allVersions = (from p in db.Products where p.ProductId == (int)id
+                                       select p.Versions).ToList();
                 product = db.Products.Find(id);
                 if (product == null)
                 {
@@ -568,6 +649,10 @@ namespace Download.Controllers
                 {
                     //populate the list.  I found that if I did not do this, the product's versions and archives would be null
                     foreach (var arch in version.Archives)
+                    {
+
+                    }
+                    foreach (var ex in version.ExtraFiles)
                     {
 
                     }
@@ -609,8 +694,13 @@ namespace Download.Controllers
             using (var db = new ProductDBContext())
             {
                 //populate the archives and version becuase again, I found that If i did not do this, that everything would be null
-                var archives = db.Archives.ToList();
-                var allVersions = db.Versions.ToList();
+                var archives = (from v in db.Versions
+                                where v.VersionId == id
+                                select v.Archives).ToList();
+                var ExFiles = (from v in db.Versions
+                               where v.VersionId == id
+                               select v.ExtraFiles).ToList();
+                                
                 version = db.Versions.Find(id);
                 if (version == null)
                 {
@@ -618,6 +708,10 @@ namespace Download.Controllers
                 }
 
                 foreach (var arch in version.Archives)
+                {
+
+                }
+                foreach (var ex in version.ExtraFiles)
                 {
 
                 }
@@ -653,29 +747,103 @@ namespace Download.Controllers
         {
             if (ModelState.IsValid)
             {
+                bool ExFileFlag = false;
                 string versName = version.VersionName;
                 Models.Version vers = new Models.Version();
+                List<ExtraFile> ExFile = new List<ExtraFile>();
                 Archive arch = new Archive();
                 using (var db = new ProductDBContext())
                 {
+
                     int ArchIndex = 0;
-                    var AllVersions = db.Versions.ToList();
-                    var AllArchives = db.Archives.ToList();
+
+                    var AllArchives = (from v in db.Versions
+                                       where v.VersionId == version.VersionId
+                                       select v.Archives).ToList();
+
+                    var AllFiles = (from v in db.Versions
+                                      where v.VersionId == version.VersionId
+                                      select v.ExtraFiles).ToList();
+
+
                     vers = db.Versions.Find(version.VersionId);
+
                     foreach (var archive in vers.Archives)
                     {
                         arch = db.Archives.Find(archive.ArchiveId);
                         ArchIndex = archive.ArchiveId;
                     }
+                    foreach (var ex in vers.ExtraFiles)
+                    {
+                        ExFile.Add(ex);        
+                    }
+
+
                     string CurrArchId = ArchIndex.ToString() + "_";
                     //Add the files to the appropriate folder based on the name, such as '.exe', or 'ReadMe'
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(vers.ProductId).ToString("D8") + "\\" + GetIndex(ArchIndex).ToString("D8") + "\\";
-                    foreach (string file in Request.Files)
+                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(vers.ProductId).ToString("D8") + "\\" + GetVersionIndex(version.VersionId).ToString("D8") + "\\";
+                    int i = 0;
+                    int j = 0;
+
+                    foreach (string FileName in Request.Files)
                     {
+                        var fileName = Request.Files[FileName].FileName;
                         try
                         {
-                            var fileName = Request.Files[file].FileName;
-                            if (fileName.Contains(".exe"))
+
+                            //Due to the way the multiple file upload works, there are multiple FileNames with 'FileUpload4'. However, each 'FileUpload4' contains all
+                            //of the multiple selected files, and the result of iterating over them without breaking after one pass would be uploading the 
+                            //number of files selected squared.
+                            if (FileName == "FileUpload5")
+                            {
+                                //Nest the check inside the 'FileUpload4' check so that the else at the end if the first if statement doesn't 
+                                //get executed
+                                ExFileFlag = true;
+                                if (i < 1)
+                                {
+                                    var LastExFile = db.ExtraFiles.ToList().Last();
+                                    string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
+                                    var uploadFiles = Request.Files.GetMultiple(FileName);
+                                    foreach (var file in uploadFiles)
+                                    {
+                                        fileName = file.FileName;
+                                        Models.ExtraFile ProductExFiles = new Models.ExtraFile();
+                                        ProductExFiles.FileName = fileName;
+                                        if (!Directory.Exists(filePath))
+                                        {
+                                            Directory.CreateDirectory(filePath);
+                                        }
+                                        fileName = CurrExId + fileName;
+                                        var path = Path.Combine(filePath, fileName);
+                                        file.SaveAs(path);
+                                        ProductExFiles.Versions.Add(vers);
+                                        vers.ExtraFiles.Add(ProductExFiles);
+                                        i++;
+                                    }
+
+
+                                }
+                            }
+                            else if(FileName == "FileUpload4")
+                            {
+                                if (fileName.CompareTo("") == 0)
+                                {
+                                    j++;
+                                }
+                                var LastExFile = db.ExtraFiles.ToList().Last();
+                                string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
+                                ExFile[j].FileName = fileName;
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
+                                fileName = CurrExId + fileName;
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[FileName].SaveAs(path);
+                                j++;
+
+                            }
+                            else if (fileName.Contains(".exe"))
                             {
                                 arch.Exe = fileName;
                                 if (!Directory.Exists(filePath))
@@ -684,10 +852,9 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
-                                //grab the version out of the .exe file
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                versName = versionInfo.ProductVersion;
+                                vers.VersionName = versionInfo.ProductVersion;
                             }
                             else if (fileName.Contains("ReadMe"))
                             {
@@ -698,18 +865,16 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                //If there is no version try to get it out of the ReadMe
-                                if (versName == null)
+                                if (vers.VersionName == null)
                                 {
-                                    versName = versionInfo.ProductVersion;
+                                    vers.VersionName = versionInfo.ProductVersion;
                                 }
                             }
                             else if (fileName.CompareTo("") == 0)
                             {
-                                //If the fileName is blank, then no file was selected, and do nothing
-
+                                //if the fileName is blank, then no file was selected and do nothing
                             }
                             else
                             {
@@ -720,12 +885,11 @@ namespace Download.Controllers
                                 }
                                 fileName = CurrArchId + fileName;
                                 var path = Path.Combine(filePath, fileName);
-                                Request.Files[file].SaveAs(path);
+                                Request.Files[FileName].SaveAs(path);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                //if there still is no version, try to grap it out of the installer
-                                if (versName == null)
+                                if (vers.VersionName == null)
                                 {
-                                    versName = versionInfo.ProductVersion;
+                                    vers.VersionName = versionInfo.ProductVersion;
                                 }
                             }
 
@@ -744,7 +908,14 @@ namespace Download.Controllers
                     db.SaveChanges();
 
                 }
-                return RedirectToAction("Edit/" + vers.ProductId.ToString());
+                if (ExFileFlag == true && version.VersionId != 0)
+                {
+                    return RedirectToAction("Description", new { id = version.VersionId});
+                }
+                else
+                {
+                    return RedirectToAction("Edit/" + vers.ProductId.ToString());
+                }
             }
             return View(version);
 
@@ -908,7 +1079,7 @@ namespace Download.Controllers
         }
         [AllowAnonymous]
         //Dowload Action which returns the selected file to the user
-        public ActionResult Download(string fileName, int id, int archId)
+        public ActionResult Download(string fileName, int id, int verId, int archId)
         {
 
             try
@@ -916,7 +1087,7 @@ namespace Download.Controllers
                 //append the archive id to the front of the fileName so the file can be found
                 fileName = archId.ToString() + "_" + fileName;
                 //add the appropriate extensions on to the root path
-                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetIndex(id).ToString("D8") + "\\" + GetIndex(archId).ToString("D8") + "\\";
+                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(id).ToString("D8") + "\\" + GetVersionIndex(verId).ToString("D8") + "\\";
                 string FullFilePath = filePath + fileName;
                 byte[] fileBytes = System.IO.File.ReadAllBytes(FullFilePath);
                 return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
@@ -933,7 +1104,7 @@ namespace Download.Controllers
         //this method gets the proper index of the folder that the product is in
         //This method also makes it so a new folder is created for every 1000 products
 
-        public int GetIndex(int id)
+        public int GetProductIndex(int id)
         {
             int index = 0;
             //extract the index
@@ -942,6 +1113,17 @@ namespace Download.Controllers
             index = index + 1;
             //multiply by 1000 to get proper index
             index = index * 1000;
+            return index;
+        }
+        public int GetVersionIndex(int id)
+        {
+            int index = 0;
+            //extract the index
+            index = (int)id / 300;
+            //add one so the name of the folder is inclusive
+            index = index + 1;
+            //multiply by 1000 to get proper index
+            index = index * 300;
             return index;
         }
         //This method return a product list of visible products, e.g., if thier
