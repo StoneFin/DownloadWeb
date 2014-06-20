@@ -1,0 +1,29 @@
+﻿@model Download.Models.ExtraFile
+
+@{
+    ViewBag.Title = "RemoveFile";
+    var search = ViewData["search"];
+    var Vid = ViewData["Vid"];
+    var page = ViewData["page"];
+
+}
+<h2>Remove</h2>
+<div style="background-color: rgba(255, 255, 255, 0.30)">
+    <h3>Are you sure you want to remove @Model.FileName?</h3>
+    <hr />
+    <h4>
+        This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
+        go into the database and change the status column
+    </h4>
+
+    @using (Html.BeginForm("RemoveFile", "Product", new { searchString = search, Vid = Vid, Fid = Model.ExtraFileId, page = page }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Remove File" class="btn btn-danger" /> |
+            @Html.ActionLink("Cancel", "EditVersion", new { id = Vid, searchString = search, page = page })
+        </div>
+    }
+</div>
+

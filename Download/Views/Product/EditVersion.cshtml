@@ -4,12 +4,14 @@
     ViewBag.Title = "EditVersion";
     var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
     int i = 0;
+    var search = ViewData["search"];
+    var page = ViewData["page"];
 }
 
 <h2>Edit Version</h2>
 
 <div style="background-color: rgba(255, 255, 255, 0.23); padding: 3px">
-    @using (Html.BeginForm("EditVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("EditVersion", "Product", new { searchString = search, page = page}, FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.VersionId);
@@ -25,7 +27,8 @@
             <hr />
             @Html.ValidationSummary(true)
         </div>
-        foreach (var arch in Model.Archives) { 
+                                                 foreach (var arch in Model.Archives)
+                                                 { 
         <div class="form-group">
             <fieldset>
                 <div>
@@ -35,7 +38,8 @@
                         <b>(currently) @arch.Exe</b> <input type="file" name="FileUpload1" />
                     </p>
                     }
-                    else { 
+                    else
+                    { 
                     <p>
                         <b>Select an .exe:</b> <input type="file" name="FileUpload1" />
                     </p>
@@ -82,19 +86,22 @@
                 </div>
             </fieldset>
         </div>
-    }
-        foreach (var ex in Model.ExtraFiles) { 
+                                                 }
+                                                 foreach (var ex in Model.ExtraFiles)
+                                                 { 
         <div class="form-group">
             <fieldset>
                 <div>
                     <p>
                         <b>(currently) @ex.FileName</b> <input type="file" name="FileUpload4" />
                         @Html.TextArea("Description[" + i.ToString() + "]", ex.FileDescription, new { @style = "width: 300px; height: 75px" })
+                        @Html.ActionLink("Remove", "RemoveFile", new { Vid = Model.VersionId, Fid = ex.ExtraFileId, searchString = search, page = page })
                     </p>
                 </div>
             </fieldset>
         </div>
-    }
+                                                     i++;
+                                                 }
     <div class="form-group">
             <fieldset>
                 <div>
@@ -120,7 +127,7 @@
                 <input type="submit" value="Save Changes" class="btn btn-default" /><br /><br />
 
             </div>
-            @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+            @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId, searchString = search, page = page })
         </div>
 
     }

@@ -8,89 +8,93 @@
     ViewBag.Title = "Index";
 }
 
-<h2>All Users</h2>
+    <h2>All Users</h2>
 
-<table class="table table-hover" style="background-color: #ffffff; border: 2px solid #4547ae">
-    <tr style="border: 2px solid #4f51d0">
-        <th>
-            @Html.Encode("User Name")
-        </th>
-        <th>
-            @Html.Encode("Role")
-        </th>
-        <th>
-            @Html.Encode("Email")
-        </th>
-        <th>
+    <table class="table table-hover" style="background-color: rgba(255, 255, 255, 0.50); border: 2px solid #ffffff">
+        <tr style="border: 2px solid #ffffff">
+            <th>
+                @Html.Encode("User Name")
+            </th>
+            <th>
+                @Html.Encode("Role")
+            </th>
+            <th>
+                @Html.Encode("Email")
+            </th>
+            <th>
 
-        </th>
-        <th>
+            </th>
+            <th>
 
-        </th>
-        <th>
+            </th>
+            <th>
 
-        </th>
-        <th>
+            </th>
+            <th>
 
-        </th>
-    </tr>
+            </th>
+        </tr>
 
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserName)
-            </td>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
 
                 @foreach (var Role in item.roleNames)
                 {
-                    if (Role == "admin") { 
-                    <td style="background-color: rgba(255, 0, 0, 0.50)">
-                        @Role <br />
-                    </td>
+                    if (Role == "admin")
+                    {
+                        <td style="background-color: rgba(255, 0, 0, 0.50)">
+                            @Role <br />
+                        </td>
                     }
-                    else if (Role == "member") { 
-                    <td style="background-color: rgba(255, 141, 0, 0.50)">
-                        @Role <br />
-                    </td>
+                    else if (Role == "member")
+                    {
+                        <td style="background-color: rgba(255, 141, 0, 0.50)">
+                            @Role <br />
+                        </td>
                     }
-                    else { 
-                    <td style="background-color: rgba(182, 255, 0, 0.50)">
-                        @Role <br />
-                    </td>
-                }
+                    else
+                    {
+                        <td style="background-color: rgba(182, 255, 0, 0.50)">
+                            @Role <br />
+                        </td>
+                    }
                 }
 
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @using (Html.BeginForm("MakeMember", "Users", new { id = item.Id }))
-                {
-                    <input type="submit" value="Make Member" class="btn btn-primary" />
-                }
-            </td>
-            <td>
-                @using (Html.BeginForm("MakeAdmin", "Users", new { id = item.Id }))
-                {
-                    <input type="submit" value="Make Admin" class="btn btn-primary" />
-                }
-            </td>
-            <td>
-                @using (Html.BeginForm("Deactivate", "Users", new { id = item.Id }))
-                {
-                    <input type="submit" value="Deactivate" class="btn btn-primary" />
-                }
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>
- 
-        </tr>
-    }
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @using (Html.BeginForm("MakeMember", "Users", new { id = item.Id }))
+                    {
+                        <input type="submit" value="Make Member" class="btn btn-primary" />
+                    }
+                </td>
+                <td>
+                    @using (Html.BeginForm("MakeAdmin", "Users", new { id = item.Id }))
+                    {
+                        <input type="submit" value="Make Admin" class="btn btn-primary" />
+                    }
+                </td>
+                <td>
+                    @using (Html.BeginForm("Deactivate", "Users", new { id = item.Id }))
+                    {
+                        <input type="submit" value="Deactivate" class="btn btn-primary" />
+                    }
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
 
-</table>
+            </tr>
+        }
+
+    </table>
+
 @*Dispaly no pagers on intial display of the page becuase no products are shown*@
 @if (Model.PageCount > 0)
 {

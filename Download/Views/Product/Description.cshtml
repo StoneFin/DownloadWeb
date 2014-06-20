@@ -9,7 +9,7 @@
 
 <h2>Add Descriptions</h2>
 <div class="clearfix">
-    @using (Html.BeginForm("Description", "Product", FormMethod.Post, new { searchString = search, page = pageNum }))
+    @using (Html.BeginForm("Description", "Product", new { searchString = search, page = pageNum, Edit = true }, FormMethod.Post, null))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
@@ -26,18 +26,22 @@
                         <b>@item.FileName</b>
                     </div>
                     <div class="col-md-8">
-                        @Html.TextArea("Description[" + i.ToString() + "]",item.FileDescription, new { @style = "width: 300px; height: 75px" })
+                        @Html.TextArea("Description[" + i.ToString() + "]", item.FileDescription, new { @style = "width: 300px; height: 75px" })
                     </div>
 
                 </div>
                 i++;
             }
-            else
-            {
-                i++;
-            }
+
         }
         @Html.HiddenFor(model => model.ExtraFiles);
-        <input type="submit" value="Create" class="btn btn-default" />
+        if (i == 1)
+        {
+          <input type="submit" value="Add Description" class="btn btn-default" />
+        }
+        else
+        {
+          <input type="submit" value="Add Descriptions" class="btn btn-default" />
+        }
     }
 </div>

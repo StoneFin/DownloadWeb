@@ -15,7 +15,7 @@
     <p>
         @if (User.IsInRole("admin"))
         {
-            <h4>@Html.ActionLink("Create New", "Create", new { searchString = search, page = pageNum })</h4>
+            <h4>@Html.ActionLink("Create New", "Create", new { searchString = search, page = pageNum }, new { @class="btn btn-info" })</h4>
         }
         @using (Html.BeginForm(new { page = 1 }))
         {
@@ -26,7 +26,7 @@
         </p>
         }
         </p>
-        <table class="table table-hover col-md-12" style="background-color: #ffffff; border: 2px solid #ffffff">
+        <table class="table table-hover col-md-12" style="background-color: rgba(255, 255, 255, 0.00); border: 2px solid #ffffff">
 
 
 
@@ -35,7 +35,7 @@
                 using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum}))
                 {
 
-                    <tr style="background-color: rgba(182, 255, 0, 0.25); border: 2px solid #ffffff">
+                    <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px solid rgba(255, 255, 255, 1.00)">
                         <td style="font-size: larger; font-style: initial" class="row">
                             @item.ProductName
                         </td>

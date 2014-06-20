@@ -78,8 +78,8 @@
             </td>
         }
         <td>
-            @Html.ActionLink("Edit", "EditVersion", new { id = version.VersionId }) |
-            @Html.ActionLink("Remove", "RemoveVersion", new { id = version.VersionId })
+            @Html.ActionLink("Edit", "EditVersion", new { id = version.VersionId, searchString = search, page = pageNum }) |
+            @Html.ActionLink("Remove", "RemoveVersion", new { id = version.VersionId, searchString = search, page = pageNum })
         </td>
     </tr>
 
@@ -87,7 +87,7 @@
 
         </table>
         <div class="col-md-2">
-            <p class="tab"> @Html.ActionLink("Add Version", "AddVersion", new { id = Model.ProductId })</p>
+            <p class="tab"> @Html.ActionLink("Add Version", "AddVersion", new { id = Model.ProductId, searchString = search, page = pageNum })</p>
         </div>
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

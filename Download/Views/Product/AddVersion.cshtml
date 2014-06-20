@@ -4,12 +4,15 @@
 @{
     ViewBag.Title = "AddVersion";
     var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
+    var prevVersions = (IEnumerable<SelectListItem>)ViewData["PrevVersions"];
+    var search = ViewData["search"];
+    var pageNum = ViewData["page"];
 }
 
 
 <h2>Add Version</h2>
-<div style="background-color: rgba(255, 255, 255, 0.25); border: 2px solid #ffffff" class="form-horizontal">
-    @using (Html.BeginForm("AddVersion", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+<div style="background-color: rgba(255, 255, 255, 0.25); border: 2px solid #ffffff" class="form-horizontal" class="clearfix">
+    @using (Html.BeginForm("AddVersion", "Product", new { searchString = search, page = pageNum}, FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
 
@@ -17,15 +20,15 @@
             <h4>@Model.ProductName</h4>
             <hr />
             @Html.ValidationSummary(true)
-            @Html.HiddenFor(model => model.ProductId) 
+            @Html.HiddenFor(model => model.ProductId)
         </div>
         <div class="form-group">
-            @Html.Label("","Select a .exe" , new  { @class = "control-label col-md-2"})
+            @Html.Label("", "Select a .exe", new { @class = "control-label col-md-2" })
             <fieldset>
                 <div class=" col-md-10">
 
                     <p>
-                    <input type="file" name="FileUpload1" />
+                        <input type="file" name="FileUpload1" />
                     </p>
                 </div>
             </fieldset>
@@ -37,7 +40,7 @@
                 <div class=" col-md-10">
 
                     <p>
-                       <input type="file" name="FileUpload2" />
+                        <input type="file" name="FileUpload2" />
                     </p>
                 </div>
             </fieldset>
@@ -50,18 +53,36 @@
                 <div class=" col-md-10">
 
                     <p>
-                       <input type="file" name="FileUpload3" />
+                        <input type="file" name="FileUpload3" />
                     </p>
                 </div>
             </fieldset>
         </div>
-                        <div class="form-group">
+        <div class="form-group">
+            @Html.Label("Extra Files If needed", new { @class = "control-label col-md-2" })
+
+            <div class=" col-md-10">
+
+                <input type="file" name="FileUpload4" id="FileUpload4" multiple="multiple" /> (Descriptions to these files can be added after you press the Add Version button)
+
+            </div>
+
+        </div>
+         <div class="form-group">
+            @Html.Label("Or Import Extra Files from a Previous Version", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("PrevVersion", prevVersions)
+
+            </div>
+        </div>
+        <div class="form-group">
             @Html.LabelFor(model => model.VersionStatus, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownList("VStatus", per)
                 @Html.ValidationMessageFor(model => model.VersionStatus)
             </div>
         </div>
+
         <div class="form-group">
             <br />
             <div class="col-md-offset-2 col-md-10">
@@ -73,6 +94,6 @@
 
 
     }
-    @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+    @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId, searchString = search, page = pageNum})
 </div>
 
