@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "RemoveVersion";
     var search = ViewData["search"];
+    var pageNum = ViewData["page"];
 
 }
 <h2>Remove</h2>
@@ -14,13 +15,13 @@
         go into the database and change the status column
     </h4>
 
-    @using (Html.BeginForm("RemoveVersion", "Product", new { searchString = search }))
+    @using (Html.BeginForm("RemoveVersion", "Product", new { searchString = search, page = pageNum, ProductId = Model.ProductId }))
     {
         @Html.AntiForgeryToken()
 
         <div class="form-actions no-color">
             <input type="submit" value="Remove Version" class="btn btn-danger" /> |
-            @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId })
+            @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId, searchString = search, page = pageNum })
         </div>
     }
 </div>

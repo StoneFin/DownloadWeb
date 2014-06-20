@@ -315,7 +315,7 @@ namespace Download.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         [ValidateAntiForgeryToken]
         //POST: /Product /AddVersion
-        public ActionResult AddVersion(AddVersionView version, string VStatus, string PrevVersion)
+        public ActionResult AddVersion(AddVersionView version, string VStatus, string PrevVersion, string searchString, int? page)
         {
             if (ModelState.IsValid)
             {
@@ -339,6 +339,8 @@ namespace Download.Controllers
                     //Add the files and extract the version from the file, with the version extracted from the .exe given the highest priority
                     string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(prod.ProductId).ToString("D8") + "\\" + GetVersionIndex(VerIndex).ToString("D8") + "\\";
                     int i = 0;
+                    //If a prevVersion was selected from the dropdown list 
+                    //grab the extra files and add them to the new version
                     if (PrevVersion != "None")
                     {
 
@@ -476,7 +478,7 @@ namespace Download.Controllers
                 else
                 {
                     //return to the previous page
-                    return RedirectToAction("Edit/" + version.ProductId.ToString());
+                    return RedirectToAction("Edit", new { id = prod.ProductId, searchString = searchString, page = page });
                 }
             }
 
@@ -551,6 +553,7 @@ namespace Download.Controllers
                                     var uploadFiles = Request.Files.GetMultiple(FileName);
                                     foreach (var file in uploadFiles)
                                     {
+                                        //increment the LastFileId by one everytime a new ExtraFile is added
                                         string CurrExId = (LastExFile.ExtraFileId + 1 + i).ToString() + "_";
                                         if (file.FileName.CompareTo("") == 0)
                                         {
@@ -808,11 +811,12 @@ namespace Download.Controllers
                 {
                     return HttpNotFound();
                 }
-
+                //Populate the Archives
                 foreach (var arch in version.Archives)
                 {
 
                 }
+                //Popluate the Extra Files
                 foreach (var ex in version.ExtraFiles)
                 {
 
@@ -885,8 +889,11 @@ namespace Download.Controllers
                     string CurrArchId = ArchIndex.ToString() + "_";
                     //Add the files to the appropriate folder based on the name, such as '.exe', or 'ReadMe'
                     string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(vers.ProductId).ToString("D8") + "\\" + GetVersionIndex(version.VersionId).ToString("D8") + "\\";
+                    //Keeps track of the number of Extra Files added
                     int i = 0;
+                    //Keeps track of the index of the Exfiles to correspond with the files in 'UploadFile4'
                     int j = 0;
+                    //Makes sure that the 'fileUpload4' only saves once
                     int k = 0;
 
                     foreach (string FileName in Request.Files)
@@ -1020,7 +1027,6 @@ namespace Download.Controllers
                     }
                     vers.VersionStatus = Convert.ToInt32(VStatus);
                     db.SaveChanges();
-
                 }
                 if (ExFileFlag == true && version.VersionId != 0)
                 {
@@ -1110,13 +1116,15 @@ namespace Download.Controllers
         }
         //Hides a specified version from all users, without actually deleting it
         // GET: /Product/RemoveVersion/5
-        public ActionResult RemoveVersion(int? id)
+        public ActionResult RemoveVersion(int? id, string searchString, int? page)
         {
 
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+            ViewData["search"] = searchString;
+            ViewData["page"] = page;
             Models.Version version;
             using (var db = new ProductDBContext())
             {
@@ -1132,7 +1140,7 @@ namespace Download.Controllers
         // POST: /Product/RemoveVersion/5
         [HttpPost, ActionName("RemoveVersion")]
         [ValidateAntiForgeryToken]
-        public ActionResult RemoveVersionConfirmed(int id)
+        public ActionResult RemoveVersionConfirmed(int id, string searchString, int? page, int ProductId)
         {
 
             Models.Version versions;
@@ -1143,7 +1151,7 @@ namespace Download.Controllers
                 versions.VersionStatus = 0;
                 db.SaveChanges();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Edit", new { searchString = searchString, page = page, id = ProductId });
         }
         //Hides a specified version from all users, without actually deleting it
         // GET: /Product/RemoveVersion/5
@@ -1234,6 +1242,7 @@ namespace Download.Controllers
         //Dowload Action which returns the selected file to the user
         public ActionResult Download(string fileName, int id, int verId, int? archId, int? fileId)
         {
+            //If there is an arch ID, then the user wants either a .exe or an Installer
             if (archId != null)
             {
                 try
@@ -1254,6 +1263,7 @@ namespace Download.Controllers
                     return RedirectToAction("Display/" + id.ToString());
                 }
             }
+            //If there is a file ID then the user want an extra file
             else if (fileId != null)
             {
                 try
@@ -1274,6 +1284,7 @@ namespace Download.Controllers
                     return RedirectToAction("Display/" + id.ToString());
                 }
             }
+            //Something went wrong, and redislpay the page
             else
             {
                 return RedirectToAction("Display/" + id.ToString()); 

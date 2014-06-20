@@ -5,143 +5,150 @@
     int i = 0;
     //contains the converted ReadMe file
     var file = ViewData["Content"];
-    var search = ViewData["search"];  
+    var search = ViewData["search"];
     var pageNum = ViewData["page"];
 }
 
 <h2>@Model.ProductName</h2>
 <hr />
 @*Check to see if there are any versions available for display/download*@
-@if (Model.Versions.Count() > 0) {
-<div style="background-color: rgba(255, 255, 255, 0.35); border: 2px solid #ffffff" class="body-content form-horizontal clearfix">
+@if (Model.Versions.Count() > 0)
+{
+    <div style="background-color: rgba(255, 255, 255, 0.35); border: 2px solid #ffffff" class="body-content form-horizontal clearfix">
 
 
-    <dl class="dl-horizontal">
+
         @foreach (var version in Model.Versions)
         {
-            <dt>
-                @Html.DisplayNameFor(model => version.VersionName)
-            </dt>
-            <dd>
-                @Html.Encode(version.VersionName)
-            </dd>
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => version.VersionName)
+                </dt>
+                <dd>
+                    @Html.Encode(version.VersionName)
+                </dd>
+            </dl>
             break;
         }
-    </dl>
-    @foreach (var date in Model.Versions)
-    {
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.Encode("Date Uploaded")
-            </dt>
-            <dd>
-                @Html.DisplayFor(model => date.DateCreated)
-            </dd>
-        </dl>
-        break;
-    }
-    <div class="text-danger">@ViewBag.Message</div>
-    <div class="md-col-2">
-        @foreach (var version in Model.Versions)
+
+        @foreach (var date in Model.Versions)
         {
-            foreach (var arch in version.Archives)
-            {
-                if (arch.Installer != null)
-                {
-                    @Html.DisplayFor(model => arch.Installer)
-                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId}))
-                    {
-                        <input type="submit" value="Download Installer" class="btn btn-primary" />
-                    }
-                }
-            }
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.Encode("Date Uploaded")
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => date.DateCreated)
+                </dd>
+            </dl>
             break;
         }
-    </div>
-    <div class="md-col-2">
-        @foreach (var version in Model.Versions)
-        {
-            foreach (var arch in version.Archives)
-            {
-                if (arch.Exe != null)
-                {
-                    @Html.DisplayFor(model => arch.Exe)
-                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId }))
-                    {
-                        <input type="submit" value="Download Exe" class="btn btn-primary" />
-                    }
-                }
-            }
-            break;
-        }
-        <br />
-    </div>
-    <h5><b>Extra Files</b></h5>
-    <div class="md-col-2">
-        @foreach (var version in Model.Versions)
-        {
-            foreach (var ex in version.ExtraFiles)
-            {
-                if (ex != null)
-                {
-                    @Html.DisplayFor(model => ex.FileName) <br />
-                    @Html.DisplayFor(model => ex.FileDescription)
-                    using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId }))
-                    {
-                        <input type="submit" value="Download" class="btn btn-primary" />
-                    }
-                }
-            }
-            break;
-        }
-        <br />
-    </div> 
-    <div>
-        @*If there is more than just the version being shown up above, display links to the additional versions*@
-        @if (Model.Versions.Count() > 1)
-        {
-            <h4>Archived Versions</h4>
-        }
-        <div>
-            <table>
+        <div class="text-danger">@ViewBag.Message</div>
+        <div class="row clearfix">
+            <div class="md-col-6">
                 @foreach (var version in Model.Versions)
                 {
-                    //Skip the first version becuase it is being displayed
-                    if (i == 0)
+                    foreach (var arch in version.Archives)
                     {
-                        i++;
+                        if (arch.Installer != null)
+                        {
+                            @Html.DisplayFor(model => arch.Installer)
+                            using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId }))
+                            {
+                                <input type="submit" value="Download Installer" class="btn btn-primary" />
+                            }
+                        }
                     }
-                    else
+                    break;
+                }
+            </div>
+
+            <div class="md-col-6">
+                @foreach (var version in Model.Versions)
+                {
+                    foreach (var arch in version.Archives)
                     {
-                        <tr>
-                            <td>
-                                @*table of archived versions for this product*@
-                                @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId })
-                            </td>
-                        </tr>
+                        if (arch.Exe != null)
+                        {
+                            @Html.DisplayFor(model => arch.Exe)
+                            using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId }))
+                            {
+                                <input type="submit" value="Download Exe" class="btn btn-primary" />
+                            }
+                        }
+                    }
+                    break;
+                }
+                <br />
+            </div>
+        </div>
+
+        <h5><b>Extra Files</b></h5>
+        <div class="md-col-2">
+            @foreach (var version in Model.Versions)
+            {
+                foreach (var ex in version.ExtraFiles)
+                {
+                    if (ex != null)
+                    {
+                        @Html.DisplayFor(model => ex.FileName) <br />
+                        @Html.DisplayFor(model => ex.FileDescription)
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId }))
+                        {
+                            <input type="submit" value="Download" class="btn btn-primary" />
+                        }
                     }
                 }
-            </table>
+                break;
+            }
+            <br />
         </div>
-    </div>
-    <h3>Read Me</h3>
-    <div class="col-md-12">
+        <div>
+            @*If there is more than just the version being shown up above, display links to the additional versions*@
+            @if (Model.Versions.Count() > 1)
+            {
+                <h4>Archived Versions</h4>
+            }
+            <div>
+                <table>
+                    @foreach (var version in Model.Versions)
+                    {
+                        //Skip the first version becuase it is being displayed
+                        if (i == 0)
+                        {
+                            i++;
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    @*table of archived versions for this product*@
+                                    @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId, searchString = search, page = pageNum })
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+        <h3>Read Me</h3>
+        <div class="col-md-12">
 
-        @*Display the Markdown readme that was converted to html*@
-        @Html.Raw(file)
-       </div>
+            @*Display the Markdown readme that was converted to html*@
+            @Html.Raw(file)
+        </div>
 
 
     </div>
 }
 @if (User.IsInRole("admin") == true || User.IsInRole("member") == true)
 {
-<h3>@ViewBag.Message1</h3>
+    <h3>@ViewBag.Message1</h3>
 }
-else 
-{ 
-@*Display another register teaser if they are not members yet*@
-<h3>@ViewBag.Message2</h3>
+else
+{
+    @*Display another register teaser if they are not members yet*@
+    <h3>@ViewBag.Message2</h3>
 }
 <br />
 <p>
