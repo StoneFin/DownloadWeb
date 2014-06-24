@@ -6,6 +6,7 @@
     var per = (IEnumerable<SelectListItem>)ViewData["permissions"];
     var search = ViewData["search"];
     var pageNum = ViewData["page"];
+    var message = TempData["message"];
 
 }
 
@@ -24,7 +25,7 @@
             <div class="col-md-10">
                 <p>
                     @Html.EditorFor(model => model.ProductName)
-                    @Html.ValidationMessageFor(model => model.ProductName)
+                  <h:message class="text-danger">@message</h:message>   
                 </p>
 
             </div>

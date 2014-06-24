@@ -4,16 +4,18 @@
     ViewBag.Title = "Description";
     var search = ViewData["search"];
     var pageNum = ViewData["page"];
+    var IsEdit = ViewData["edit"];
     int i = 0;
 }
 
 <h2>Add Descriptions</h2>
 <div class="clearfix">
-    @using (Html.BeginForm("Description", "Product", new { searchString = search, page = pageNum, Edit = true }, FormMethod.Post, null))
+    @using (Html.BeginForm("Description", "Product", new { searchString = search, page = pageNum, IsEdit = IsEdit }, FormMethod.Post, null))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
         @Html.HiddenFor(model => model.VersionId)
+        @Html.HiddenFor(model => model.ProductId)
 
 
 

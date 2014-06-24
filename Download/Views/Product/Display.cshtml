@@ -7,6 +7,7 @@
     var file = ViewData["Content"];
     var search = ViewData["search"];
     var pageNum = ViewData["page"];
+
 }
 
 <h2>@Model.ProductName</h2>
@@ -43,66 +44,79 @@
             </dl>
             break;
         }
+        <hr />
         <div class="text-danger">@ViewBag.Message</div>
-        <div class="row clearfix">
-            <div class="md-col-6">
-                @foreach (var version in Model.Versions)
-                {
-                    foreach (var arch in version.Archives)
-                    {
-                        if (arch.Installer != null)
-                        {
-                            @Html.DisplayFor(model => arch.Installer)
-                            using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId }))
-                            {
-                                <input type="submit" value="Download Installer" class="btn btn-primary" />
-                            }
-                        }
-                    }
-                    break;
-                }
-            </div>
-
-            <div class="md-col-6">
-                @foreach (var version in Model.Versions)
-                {
-                    foreach (var arch in version.Archives)
-                    {
-                        if (arch.Exe != null)
-                        {
-                            @Html.DisplayFor(model => arch.Exe)
-                            using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId }))
-                            {
-                                <input type="submit" value="Download Exe" class="btn btn-primary" />
-                            }
-                        }
-                    }
-                    break;
-                }
-                <br />
-            </div>
-        </div>
-
-        <h5><b>Extra Files</b></h5>
-        <div class="md-col-2">
+        <div class="form-group clearfix">
             @foreach (var version in Model.Versions)
             {
-                foreach (var ex in version.ExtraFiles)
+
+                foreach (var arch in version.Archives)
                 {
-                    if (ex != null)
+                    if (arch.Installer != null)
                     {
-                        @Html.DisplayFor(model => ex.FileName) <br />
-                        @Html.DisplayFor(model => ex.FileDescription)
-                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId }))
+
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
                         {
-                            <input type="submit" value="Download" class="btn btn-primary" />
+                            <b>@arch.Installer</b><br />
+                            <input type="submit" value="Download Installer" class="btn btn-primary" />
+
                         }
                     }
+                    if (arch.Exe != null)
+                    {
+
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
+                        {
+                            <b>@arch.Exe</b><br />
+                            <input type="submit" value="Download Exe" class="btn btn-primary" />
+                        }
+                    }
+
                 }
                 break;
             }
             <br />
+
         </div>
+
+        <h5><b>Extra Files</b></h5>
+        <hr />
+
+        @foreach (var version in Model.Versions)
+        {
+            <div class="form-group clearfix">
+                @foreach (var ex in version.ExtraFiles)
+                {
+                    if (ex != null)
+                    {
+                <div class="col-md-2">
+
+                        <b> @Html.DisplayFor(model => ex.FileName) </b><br />
+                        @Html.DisplayFor(model => ex.FileDescription)<br />
+                    </div>
+                    }
+                }
+            </div>
+            <div class="form-group">
+                @foreach (var ex in version.ExtraFiles)
+                {
+                    if (ex != null)
+                    {
+
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
+                        {
+
+                            <input type="submit" value="Download" class="btn btn-primary" />
+
+                        }
+                    }
+                }
+            </div>
+
+                break;
+        }
+        <br />
+
         <div>
             @*If there is more than just the version being shown up above, display links to the additional versions*@
             @if (Model.Versions.Count() > 1)
@@ -132,6 +146,7 @@
             </div>
         </div>
         <h3>Read Me</h3>
+        <hr />
         <div class="col-md-12">
 
             @*Display the Markdown readme that was converted to html*@

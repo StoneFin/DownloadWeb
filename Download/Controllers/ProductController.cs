@@ -274,7 +274,7 @@ namespace Download.Controllers
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
- 
+
             }
             ViewData["search"] = searchString;
             ViewData["page"] = page;
@@ -374,22 +374,23 @@ namespace Download.Controllers
                                         {
                                             //If this is true, then there is no file to upload, and do nothing
                                         }
-                                        else {
-                                        ExFileFlag = true;
-                                        fileName = file.FileName;
-                                        Models.ExtraFile ProductExFiles = new Models.ExtraFile();
-                                        ProductExFiles.FileName = fileName;
-                                        if (!Directory.Exists(filePath))
+                                        else
                                         {
-                                            Directory.CreateDirectory(filePath);
-                                        }
-                                        fileName = CurrExId + fileName;
-                                        var path = Path.Combine(filePath, fileName);
-                                        file.SaveAs(path);
-                                        ProductExFiles.Versions.Add(ProductVersion);
-                                        ProductVersion.ExtraFiles.Add(ProductExFiles);
-                                        i++;
+                                            ExFileFlag = true;
+                                            fileName = file.FileName;
+                                            Models.ExtraFile ProductExFiles = new Models.ExtraFile();
+                                            ProductExFiles.FileName = fileName;
+                                            if (!Directory.Exists(filePath))
+                                            {
+                                                Directory.CreateDirectory(filePath);
                                             }
+                                            fileName = CurrExId + fileName;
+                                            var path = Path.Combine(filePath, fileName);
+                                            file.SaveAs(path);
+                                            ProductExFiles.Versions.Add(ProductVersion);
+                                            ProductVersion.ExtraFiles.Add(ProductExFiles);
+                                            i++;
+                                        }
                                     }
 
 
@@ -473,7 +474,7 @@ namespace Download.Controllers
                 }
                 if (ExFileFlag == true && ProductVersion.VersionId != 0)
                 {
-                    return RedirectToAction("Description", new { id = ProductVersion.VersionId });
+                    return RedirectToAction("Description", new { id = ProductVersion.VersionId, IsEdit = true, searchString = searchString, page = page });
                 }
                 else
                 {
@@ -517,6 +518,12 @@ namespace Download.Controllers
                 {
                     Product prod = new Product();
                     prod.ProductName = product.ProductName;
+                    //Check to see if the user entered a product name and if not display error message
+                    if (product.ProductName == null)
+                    {
+                        TempData["message"] = "Product Name is required";
+                        return RedirectToAction("Create");
+                    }
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
                     var LastArchive = db.Archives.ToList().Last();
@@ -524,7 +531,7 @@ namespace Download.Controllers
                     CurrVerId = LastVersion.VersionId + 1;
                     //add one to the last archive id to get this archvie Id before it is put in the database
                     string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
- 
+
                     prod.ProductStatus = 1;
                     Models.Archive ProductArchive = new Models.Archive();
                     Models.Version ProductVersion = new Models.Version();
@@ -657,7 +664,7 @@ namespace Download.Controllers
                 }
                 if (ExFileFlag == true && CurrVerId != 0)
                 {
-                    return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page });
+                    return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page, IsEdit = false });
                 }
                 else
                 {
@@ -669,14 +676,15 @@ namespace Download.Controllers
             return View(product);
         }
         //GET: /Product/Description/5
-        public ActionResult Description(int? id, string searchString, int? page)
+        public ActionResult Description(int? id, string searchString, int? page, bool? IsEdit)
         {
             if (id == null)
             {
-              return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             ViewData["page"] = page;
             ViewData["search"] = searchString;
+            ViewData["edit"] = IsEdit;
             List<ExtraFile> ExFiles = new List<ExtraFile>();
             Models.Version version = new Models.Version();
             using (var db = new ProductDBContext())
@@ -692,13 +700,13 @@ namespace Download.Controllers
         //POST: /Product/Description/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Description([Bind(Include = "VersionId")] Models.Version Version, string searchString, int? page, string[] Description, bool? Edit)
+        public ActionResult Description([Bind(Include = "VersionId,ProductId")] Models.Version Version, string searchString, int? page, string[] Description, bool? IsEdit)
         {
 
             ExtraFile ExFiles = new ExtraFile();
             using (var db = new ProductDBContext())
             {
-                var version = db.Versions.Find(Version.VersionId);                
+                var version = db.Versions.Find(Version.VersionId);
                 int i = 0;
                 foreach (var ex in version.ExtraFiles)
                 {
@@ -713,11 +721,13 @@ namespace Download.Controllers
             }
             //If this is true, then we are coming from the edit version, in which case we want to redirect back to
             // the edit controller
-            if (Edit == true)
+            if (IsEdit == true)
             {
-                return RedirectToAction("Edit", new { id = Version.VersionId, searchString = searchString, page = page });
-            }else{
-            return RedirectToAction("Index", new { searchString = searchString, page = page });
+                return RedirectToAction("Edit", new { id = Version.ProductId, searchString = searchString, page = page });
+            }
+            else
+            {
+                return RedirectToAction("Index", new { searchString = searchString, page = page });
             }
         }
 
@@ -740,8 +750,9 @@ namespace Download.Controllers
                                    where p.ProductId == (int)id
                                    select v.Archives).ToList();
 
-                var allVersions = (from p in db.Products where p.ProductId == (int)id
-                                       select p.Versions).ToList();
+                var allVersions = (from p in db.Products
+                                   where p.ProductId == (int)id
+                                   select p.Versions).ToList();
                 product = db.Products.Find(id);
                 if (product == null)
                 {
@@ -805,7 +816,7 @@ namespace Download.Controllers
                 var ExFiles = (from v in db.Versions
                                where v.VersionId == id
                                select v.ExtraFiles).ToList();
-                                
+
                 version = db.Versions.Find(id);
                 if (version == null)
                 {
@@ -849,9 +860,8 @@ namespace Download.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditVersion([Bind(Include = "VersionName, VersionId")] Models.Version version, string VStatus, string[] Description, string searchString, int? page)
+        public ActionResult EditVersion([Bind(Include = "VersionName,VersionId")] Models.Version version, string VStatus, string[] Description, string searchString, int? page)
         {
-
             if (ModelState.IsValid)
             {
                 bool ExFileFlag = false;
@@ -869,8 +879,8 @@ namespace Download.Controllers
                                        select v.Archives).ToList();
 
                     var AllFiles = (from v in db.Versions
-                                      where v.VersionId == version.VersionId
-                                      select v.ExtraFiles).ToList();
+                                    where v.VersionId == version.VersionId
+                                    select v.ExtraFiles).ToList();
 
 
                     vers = db.Versions.Find(version.VersionId);
@@ -882,7 +892,7 @@ namespace Download.Controllers
                     }
                     foreach (var ex in vers.ExtraFiles)
                     {
-                        ExFile.Add(ex);        
+                        ExFile.Add(ex);
                     }
 
 
@@ -895,6 +905,8 @@ namespace Download.Controllers
                     int j = 0;
                     //Makes sure that the 'fileUpload4' only saves once
                     int k = 0;
+                    //Keeps track of the number of files added in the edit so the ExFileId can be properly anticipated
+                    int l = 0;
 
                     foreach (string FileName in Request.Files)
                     {
@@ -912,11 +924,12 @@ namespace Download.Controllers
                                 ExFileFlag = true;
                                 if (i < 1)
                                 {
-                                    var LastExFile = db.ExtraFiles.ToList().Last();
-                                    string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
+
                                     var uploadFiles = Request.Files.GetMultiple(FileName);
                                     foreach (var file in uploadFiles)
                                     {
+                                        var LastExFile = db.ExtraFiles.ToList().Last();
+                                        string CurrExId = (LastExFile.ExtraFileId + 1 + l).ToString() + "_";
                                         fileName = file.FileName;
                                         Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                         ProductExFiles.FileName = fileName;
@@ -930,12 +943,13 @@ namespace Download.Controllers
                                         ProductExFiles.Versions.Add(vers);
                                         vers.ExtraFiles.Add(ProductExFiles);
                                         i++;
+                                        l++;
                                     }
 
 
                                 }
                             }
-                            else if(FileName == "FileUpload4" && k <1)
+                            else if (FileName == "FileUpload4" && k < 1)
                             {
                                 var uploadFiles = Request.Files.GetMultiple(FileName);
                                 foreach (var file in uploadFiles)
@@ -947,17 +961,23 @@ namespace Download.Controllers
                                     }
                                     else
                                     {
+                                        fileName = file.FileName;
                                         var LastExFile = db.ExtraFiles.ToList().Last();
                                         string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
-                                        ExFile[j].FileName = file.FileName;
-                                        ExFile[j].FileDescription = Description[j];
+                                        ExtraFile ProductExFiles = new ExtraFile();
+                                        ProductExFiles.FileName = fileName;
+                                        ProductExFiles.FileDescription = Description[j];
                                         if (!Directory.Exists(filePath))
                                         {
                                             Directory.CreateDirectory(filePath);
                                         }
                                         fileName = CurrExId + fileName;
                                         var path = Path.Combine(filePath, fileName);
-                                        Request.Files[FileName].SaveAs(path);
+                                        file.SaveAs(path);
+                                        vers.ExtraFiles.Remove(ExFile[j]);
+                                        ProductExFiles.Versions.Add(vers);
+                                        vers.ExtraFiles.Add(ProductExFiles);
+                                        l++;
                                         j++;
                                     }
                                 }
@@ -1030,7 +1050,7 @@ namespace Download.Controllers
                 }
                 if (ExFileFlag == true && version.VersionId != 0)
                 {
-                    return RedirectToAction("Description", new { id = version.VersionId, searchString = searchString, page = page});
+                    return RedirectToAction("Description", new { id = version.VersionId, searchString = searchString, page = page, IsEdit = true });
                 }
                 else
                 {
@@ -1155,8 +1175,10 @@ namespace Download.Controllers
         }
         //Hides a specified version from all users, without actually deleting it
         // GET: /Product/RemoveVersion/5
-        public ActionResult RemoveFile(int? Vid, int? Fid)
+        public ActionResult RemoveFile(int? Vid, int? Fid, string searchString, int? page)
         {
+            ViewData["search"] = searchString;
+            ViewData["page"] = page;
 
             if (Vid == null || Fid == null)
             {
@@ -1178,7 +1200,7 @@ namespace Download.Controllers
         // POST: /Product/RemoveVersion/5
         [HttpPost, ActionName("RemoveFile")]
         [ValidateAntiForgeryToken]
-        public ActionResult RemoveFileConfirmed(int Fid, int Vid)
+        public ActionResult RemoveFileConfirmed(int Fid, int Vid, string searchString, int? page)
         {
 
             Models.Version versions;
@@ -1190,7 +1212,7 @@ namespace Download.Controllers
                 versions.ExtraFiles.Remove(ExFile);
                 db.SaveChanges();
             }
-            return RedirectToAction("EditVersion", new { id = Vid });
+            return RedirectToAction("EditVersion", new { id = Vid, searchString = searchString, page = page });
         }
         //This was a default method when I created the controller and I'm not sure what it does
         protected override void Dispose(bool disposing)
@@ -1239,8 +1261,9 @@ namespace Download.Controllers
             return RedirectToAction("Index");
         }
         [AllowAnonymous]
+        [HttpPost]
         //Dowload Action which returns the selected file to the user
-        public ActionResult Download(string fileName, int id, int verId, int? archId, int? fileId)
+        public ActionResult Download(string fileName, int id, int verId, int? archId, int? fileId, string searchString, int? page)
         {
             //If there is an arch ID, then the user wants either a .exe or an Installer
             if (archId != null)
@@ -1260,7 +1283,6 @@ namespace Download.Controllers
                     //error message for file not found
                     TempData["message"] = "Error, could not find file " + fileName;
                     //if there was an error, then redirect to the same page
-                    return RedirectToAction("Display/" + id.ToString());
                 }
             }
             //If there is a file ID then the user want an extra file
@@ -1281,14 +1303,9 @@ namespace Download.Controllers
                     //error message for file not found
                     TempData["message"] = "Error, could not find file " + fileName;
                     //if there was an error, then redirect to the same page
-                    return RedirectToAction("Display/" + id.ToString());
                 }
             }
-            //Something went wrong, and redislpay the page
-            else
-            {
-                return RedirectToAction("Display/" + id.ToString()); 
-            }
+            return RedirectToAction("Display", new { id = id, searchString = searchString, page = page });
         }
 
         //this method gets the proper index of the folder that the product is in

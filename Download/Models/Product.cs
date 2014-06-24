@@ -14,6 +14,7 @@ namespace Download.Models
             public int ProductId { get; set; }
             [Required]
             [Display(Name = "Product Name")]
+            [StringLength(200, MinimumLength=1)]
             public string ProductName { get; set; }
             public virtual ICollection<Version> Versions { get; set; }
             public Product(){
