@@ -15,7 +15,7 @@
 @*Check to see if there are any versions available for display/download*@
 @if (Model.Versions.Count() > 0)
 {
-    <div style="background-color: rgba(255, 255, 255, 0.35); border: 2px solid #ffffff" class="body-content form-horizontal clearfix">
+    <div class="body-content form-horizontal clearfix">
 
 
 
@@ -44,7 +44,6 @@
             </dl>
             break;
         }
-        <hr />
         <div class="text-danger">@ViewBag.Message</div>
         <div class="form-group clearfix">
             @foreach (var version in Model.Versions)
@@ -55,7 +54,7 @@
                     if (arch.Installer != null)
                     {
 
-                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-3" }))
                         {
                             <b>@arch.Installer</b><br />
                             <input type="submit" value="Download Installer" class="btn btn-primary" />
@@ -65,7 +64,7 @@
                     if (arch.Exe != null)
                     {
 
-                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-3" }))
                         {
                             <b>@arch.Exe</b><br />
                             <input type="submit" value="Download Exe" class="btn btn-primary" />
@@ -78,9 +77,12 @@
             <br />
 
         </div>
-
-        <h5><b>Extra Files</b></h5>
-        <hr />
+        @if (Model.Versions[0].ExtraFiles.Count() != 0)
+        {
+            <hr />
+            <h5><b>Extra Files</b></h5>
+            <hr />
+        }
 
         @foreach (var version in Model.Versions)
         {
@@ -89,11 +91,11 @@
                 {
                     if (ex != null)
                     {
-                <div class="col-md-2">
+                        <div class="col-md-3">
 
-                        <b> @Html.DisplayFor(model => ex.FileName) </b><br />
-                        @Html.DisplayFor(model => ex.FileDescription)<br />
-                    </div>
+                            <b> @Html.DisplayFor(model => ex.FileName) </b><br />
+                            <i>@Html.DisplayFor(model => ex.FileDescription)</i><br />
+                        </div>
                     }
                 }
             </div>
@@ -103,7 +105,7 @@
                     if (ex != null)
                     {
 
-                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-2" }))
+                        using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-3" }))
                         {
 
                             <input type="submit" value="Download" class="btn btn-primary" />
@@ -115,7 +117,7 @@
 
                 break;
         }
-        <br />
+        <hr />
 
         <div>
             @*If there is more than just the version being shown up above, display links to the additional versions*@
@@ -145,9 +147,10 @@
                 </table>
             </div>
         </div>
+        <hr />
         <h3>Read Me</h3>
         <hr />
-        <div class="col-md-12">
+        <div class="col-md-12" style="background-color: rgba(0, 0, 0, 0.15); border: 2px solid #ffffff;">
 
             @*Display the Markdown readme that was converted to html*@
             @Html.Raw(file)

@@ -10,14 +10,14 @@
 
 <h2>Edit Version</h2>
 
-<div style="background-color: rgba(255, 255, 255, 0.23); padding: 3px">
-    @using (Html.BeginForm("EditVersion", "Product", new { searchString = search, page = page}, FormMethod.Post, new { enctype = "multipart/form-data" }))
+<div style="padding: inherit" class="clearfix form-horizontal">
+    @using (Html.BeginForm("EditVersion", "Product", new { searchString = search, page = page }, FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.VersionId)
 
 
-        <div class="form-horizontal">
+        <div class="form-horizontal clearfix">
             <div class="form-group">
                 @Html.LabelFor(model => model.VersionName, new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
@@ -28,112 +28,113 @@
             <hr />
             @Html.ValidationSummary(true)
         </div>
-                                                 foreach (var arch in Model.Archives)
-                                                 { 
-        <div class="form-group">
-            <fieldset>
-                <div>
-                    @if (arch.Exe != null)
-                    {
-                    <p>
-                        <b>(currently) @arch.Exe</b> <input type="file" name="FileUpload1" />
-                    </p>
-                    }
-                    else
-                    { 
-                    <p>
-                        <b>Select an .exe:</b> <input type="file" name="FileUpload1" />
-                    </p>
-                    }
-                </div>
-            </fieldset>
-        </div>
-        <div class="form-group">
-            <fieldset>
-                <div>
-                    @if (arch.Installer != null)
-                    {
-                    <p>
-                        <b>(currently) @arch.Installer</b> <input type="file" name="FileUpload2" />
-                    </p>
-                    }
-                    else
-                    {
-                    <p>
-                        <b>Select an Installer:</b> <input type="file" name="FileUpload2" />
-                   </p>
-                    }
-                </div>
-            </fieldset>
+        foreach (var arch in Model.Archives)
+        {
+            <div class="form-group">
+                <fieldset>
+                    <div>
+                        @if (arch.Exe != null)
+                        {
+                            <p>
+                                <b>(currently) @arch.Exe</b> <input type="file" name="FileUpload1" />
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                <b>Select an .exe:</b> <input type="file" name="FileUpload1" />
+                            </p>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+            <div class="form-group">
+                <fieldset>
+                    <div>
+                        @if (arch.Installer != null)
+                        {
+                            <p>
+                                <b>(currently) @arch.Installer</b> <input type="file" name="FileUpload2" />
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                <b>Select an Installer:</b> <input type="file" name="FileUpload2" />
+                            </p>
+                        }
+                    </div>
+                </fieldset>
 
-        </div>
+            </div>
 
+            <div class="form-group">
+                <fieldset>
+                    <div>
+
+                        @if (arch.ReadMe != null)
+                        {
+                            <p>
+                                <b>(currently) @arch.ReadMe</b> <input type="file" name="FileUpload3" />
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                <b>Select a ReadMe:</b> <input type="file" name="FileUpload3" />
+                            </p>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+        <hr />
+        <h4><strong>Extra Files</strong></h4>
+        <hr />
+        foreach (var ex in Model.ExtraFiles)
+        {
+            <div class="form-group">
+                <fieldset>
+                    <div>
+                        <p>
+                            <b>(currently) @ex.FileName</b> <input type="file" name="FileUpload4" />
+                            @Html.TextArea("Description[" + i.ToString() + "]", ex.FileDescription, new { @style = "width: 300px; height: 75px" })
+                            @Html.ActionLink("Remove File", "RemoveFile", new { Vid = Model.VersionId, Fid = ex.ExtraFileId, searchString = search, page = page })
+                        </p>
+                    </div>
+                </fieldset>
+            </div>
+            i++;
+        }
         <div class="form-group">
             <fieldset>
                 <div>
-
-                    @if (arch.ReadMe != null)
-                    {
                     <p>
-                       <b>(currently) @arch.ReadMe</b> <input type="file" name="FileUpload3" />
+                        <b>Add more Extra Files</b> <input type="file" name="FileUpload5" multiple="multiple" />
                     </p>
-                    }
-                    else
-                    {
-                     <p>
-                          <b>Select a ReadMe:</b> <input type="file" name="FileUpload3" />
-                    </p>
-                    }
                 </div>
             </fieldset>
         </div>
-                                                 }
-                                                 foreach (var ex in Model.ExtraFiles)
-                                                 { 
+        <hr />
         <div class="form-group">
-            <fieldset>
-                <div>
-                    <p>
-                        <b>(currently) @ex.FileName</b> <input type="file" name="FileUpload4" />
-                        @Html.TextArea("Description[" + i.ToString() + "]", ex.FileDescription, new { @style = "width: 300px; height: 75px" })
-                        @Html.ActionLink("Remove", "RemoveFile", new { Vid = Model.VersionId, Fid = ex.ExtraFileId, searchString = search, page = page })
-                    </p>
-                </div>
-            </fieldset>
-        </div>
-                                                     i++;
-                                                 }
-    <div class="form-group">
-            <fieldset>
-                <div>
-                    <p>
-                        <b>Add more Extra Files</b> <input type="file" name="FileUpload5" multiple="multiple"/>
-                    </p>
-                </div>
-            </fieldset>
-        </div>
-        
-                <div class="form-group">
             @Html.Label("Version Permission", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownList("VStatus", per)
                 @Html.ValidationMessageFor(model => model.VersionStatus)<br /><br />
             </div>
         </div>
-        
+<hr />
 
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save Changes" class="btn btn-default" /><br /><br />
 
-            </div>
+                <input type="submit" value="Save Changes" class="btn btn-default col-md-offeset-2" /><br /><br />
+
             @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId, searchString = search, page = page })
-        </div>
+
 
     }
 </div>
 
-    @section Scripts {
-        @Scripts.Render("~/bundles/jqueryval")
-    }
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

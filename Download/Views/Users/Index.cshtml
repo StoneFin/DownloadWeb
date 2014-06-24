@@ -8,9 +8,10 @@
     ViewBag.Title = "Index";
 }
 
-    <h2>All Users</h2>
+<h2>All Users</h2>
 
-    <table class="table table-hover" style="background-color: rgba(255, 255, 255, 0.50); border: 2px solid #ffffff">
+<table class="table table-hover" style="background-color: rgba(255, 255, 255, 0.50); border: 2px solid #ffffff">
+    <thead>
         <tr style="border: 2px solid #ffffff">
             <th>
                 @Html.Encode("User Name")
@@ -34,6 +35,8 @@
 
             </th>
         </tr>
+    </thead>
+    <tbody>
 
         @foreach (var item in Model)
         {
@@ -46,19 +49,19 @@
                 {
                     if (Role == "admin")
                     {
-                        <td style="background-color: rgba(255, 0, 0, 0.50)">
+                        <td style="background-color: rgba(255, 0, 0, 0.50); color: #000;">
                             @Role <br />
                         </td>
                     }
                     else if (Role == "member")
                     {
-                        <td style="background-color: rgba(255, 141, 0, 0.50)">
+                        <td style="background-color: rgba(255, 141, 0, 0.50); color: #000;">
                             @Role <br />
                         </td>
                     }
                     else
                     {
-                        <td style="background-color: rgba(182, 255, 0, 0.50)">
+                        <td style="background-color: rgba(182, 255, 0, 0.50); color: #000;">
                             @Role <br />
                         </td>
                     }
@@ -86,14 +89,15 @@
                     }
                 </td>
                 <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @style = "color: inherit" }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @style = "color: inherit" })
                 </td>
 
             </tr>
         }
+    </tbody>
 
-    </table>
+</table>
 
 @*Dispaly no pagers on intial display of the page becuase no products are shown*@
 @if (Model.PageCount > 0)

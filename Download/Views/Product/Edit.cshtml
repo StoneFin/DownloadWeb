@@ -8,17 +8,17 @@
 }
 
 <h2 style="font-family: Arial">Edit</h2>
+<hr />
 
 
 @using (Html.BeginForm(new { searchString = search, page = pageNum }))
 {
     @Html.AntiForgeryToken()
-    <div class="form-horizontal" style="background-color: rgba(255, 255, 255, 0.26); border: 2px solid #ffffff; ">
-        <hr />
+    <div class="form-horizontal" >
         @Html.ValidationSummary(true)
         @Html.HiddenFor(model => model.ProductId)
         @Html.HiddenFor(model => model.ProductStatus)
-
+        <br />
         <div class="form-group">
             @Html.LabelFor(model => model.ProductName, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
@@ -27,63 +27,70 @@
             </div>
         </div>
         <table style="background-color: rgba(255, 255, 255, 0.50);" class="table table-hover">
+            <thead>
+                <tr>
 
-            <tr>
-                <th>
-                    @Html.Encode("Version")
-                </th>
-                <th>
-                    @Html.Encode(".exe")
-                </th>
-                <th>
-                    @Html.Encode("Installer")
-                </th>
-                <th>
-                    @Html.Encode("ReadMe")
-                </th>
-                <th>
-                    @Html.Encode("Extra Files")
-                </th>
-                <th>
+                    <th>
+                        @Html.Encode("Version")
+                    </th>
+                    <th>
+                        @Html.Encode(".exe")
+                    </th>
+                    <th>
+                        @Html.Encode("Installer")
+                    </th>
+                    <th>
+                        @Html.Encode("ReadMe")
+                    </th>
+                    <th>
+                        @Html.Encode("Extra Files")
+                    </th>
+                    <th>
 
-                </th>
+                    </th>
                 </tr>
-@foreach (var version in Model.Versions)
-{
 
-    <tr style="border: 2px solid #ffffff">
-        <td>
-            @version.VersionName
-        </td>
-        @foreach (var arch in version.Archives)
-        {
-            <td>
-                @arch.Exe
-            </td>
-            <td>
-                @arch.Installer
-            </td>
-            <td>
-                @arch.ReadMe
-            </td>
-        }
-        @if (version.ExtraFiles != null) { 
-        <td>
-        @foreach (var ex in version.ExtraFiles)
-        {
-            
-                @ex.FileName<br />
-            
-        }
-            </td>
-        }
-        <td>
-            @Html.ActionLink("Edit", "EditVersion", new { id = version.VersionId, searchString = search, page = pageNum }) |
-            @Html.ActionLink("Remove", "RemoveVersion", new { id = version.VersionId, searchString = search, page = pageNum })
-        </td>
-    </tr>
+            </thead>
+            <tbody>
+                @foreach (var version in Model.Versions)
+                {
 
-}
+                    <tr >
+                        <td>
+                            @version.VersionName
+                        </td>
+                        @foreach (var arch in version.Archives)
+                        {
+                            <td>
+                                @arch.Exe
+                            </td>
+                            <td>
+                                @arch.Installer
+                            </td>
+                            <td>
+                                @arch.ReadMe
+                            </td>
+                        }
+                        @if (version.ExtraFiles != null)
+                        {
+                            <td>
+                                @foreach (var ex in version.ExtraFiles)
+                                {
+
+                                    @ex.FileName<br />
+
+                                }
+                            </td>
+                        }
+                        <td>
+                            @Html.ActionLink("Edit", "EditVersion", new { id = version.VersionId, searchString = search, page = pageNum }, new { @style = "color: inherit" }) |
+                            @Html.ActionLink("Remove", "RemoveVersion", new { id = version.VersionId, searchString = search, page = pageNum }, new { @style = "color: inherit" })
+                        </td>
+                    </tr>
+
+
+                }
+            </tbody>
 
         </table>
         <div class="col-md-2">
@@ -95,10 +102,10 @@
             </div>
 
         </div>
-     </div>
+    </div>
 }
 
-<div >
+<div>
     <p class="tab">@Html.ActionLink("Back to List", "Index", new { searchString = search, page = pageNum })</p>
 </div>
 

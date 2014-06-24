@@ -10,7 +10,7 @@
     var pageNum = ViewData["page"];
     
 }
-<div class="body-content" style="background-color: rgba(255, 255, 255, 0.32); border: 2px solid #ffffff;">
+<div class="body-content" >
 
     <p>
         @if (User.IsInRole("admin"))
@@ -26,33 +26,36 @@
         </p>
         }
         </p>
-        <table class="table table-hover col-md-12" style="background-color: rgba(255, 255, 255, 0.00); border: 2px solid #ffffff">
+
+        <table class="table table-hover col-md-12" style="background-color: rgba(255, 255, 255, 0.00);">
 
 
 
             @foreach (var item in Model)
             {
-                using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum}))
-                {
 
-                    <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px solid rgba(255, 255, 255, 1.00)">
+
+                    <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;" >
                         <td style="font-size: larger; font-style: initial" class="row">
                             @item.ProductName
                         </td>
                         <td class="row">
+                            @using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum}))
+                            {
                             <input type="submit" value="Download" class="btn btn-primary" />
+                            }
                         </td>
                         
                         @if (User.IsInRole("admin") == true)
 {
-    <td class="row">
-        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }) |
-        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum })
+    <td class="row" >
+        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" }) |
+        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" })
     </td>
 }
                         
                     </tr>
-                }
+
 
             }
 

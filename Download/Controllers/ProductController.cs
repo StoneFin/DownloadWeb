@@ -24,14 +24,9 @@ namespace Download.Controllers
         {
 
 
-            if (searchString == "")
-            {
-                ViewData["search"] = " ";
-            }
-            else
-            {
+ 
                 ViewData["search"] = searchString;
-            }
+            
             List<Product> products = new List<Product>();
             //display 10 results per page
             int pageSize = 10;
@@ -46,14 +41,14 @@ namespace Download.Controllers
             {
 
                 //blank search, return all products
-                if (searchString == "" || searchString == " ")
+                if (searchString == "" || searchString == null)
                 {
                     //Return all products in Alphabetical Order
                     products = db.Products.OrderBy(p => p.ProductName).ToList();
 
                 }
                 //user entered a search, return matching products
-                else if (searchString != null)
+                else
                 {
                     //if the search string is not empty, then only return the matching products to the user
                     //Return the search results in alphabetical order
@@ -61,10 +56,7 @@ namespace Download.Controllers
                     products = db.Products.Where(s => s.ProductName.Contains(searchString)).OrderBy(p => p.ProductName).ToList();
                     page = 1;
                 }
-                //page was just initialized and display nothing
-                else
-                {
-                }
+
                 //Show only the visible products
                 products = products.Where(x => x.ProductStatus > 0).ToList();
                 //If there are no products in the database, display a blank Index
