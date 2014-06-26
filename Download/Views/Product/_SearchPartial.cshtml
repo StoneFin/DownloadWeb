@@ -10,13 +10,12 @@
     var pageNum = ViewData["page"];
 
 }
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <div class="body-content">
 
 
     @if (User.IsInRole("admin"))
     {
-        <h4>@Html.ActionLink("Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</h4>
+        <h4>@Html.ActionLink("+ Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</h4>
     }
     <br />
     @using (Html.BeginForm(new { page = 1 }))
@@ -35,28 +34,26 @@
         {
 
 
-            <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;">
+            <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;" class="hidebutton">
                 <td style="font-size: larger; font-style: initial" class="row">
                     @item.ProductName
                 </td>
-                <td id="download">
+                <td>
                     @using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum }))
                     {
-                        <input type="submit" value="Download" class="btn btn-primary fade" id="thedownload" />
+                        <input type="submit" value="Download" class="btn btn-block"  />
                     }
                 </td>
 
                 @if (User.IsInRole("admin") == true)
                 {
-                    <td class="row">
-                        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" }) |
-                        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" })
+                    <td class="row ">
+                            @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" }) |
+                            @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" })
                     </td>
                 }
 
             </tr>
-
-
         }
 
     </table>
@@ -76,16 +73,6 @@
     }
 </div>
 
-    <script>
-        $(function () {
-            var download = function () {
-                $("thedownload").fadeIn(1);
-                $("thedownload").fadeout(1);
-                };
-            $("#download").hover(download);
-        });
-        
-    </script>
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }

@@ -1434,6 +1434,15 @@ th {
   vertical-align: top;
   border-top: 1px solid #dddddd;
 }
+.hidebutton{
+padding: inherit;
+}
+.hidebutton .hidehover {
+    visibility:hidden;
+}
+.hidebutton:hover .hidehover {
+    visibility:visible;
+}
 
 .table thead > tr > th {
   vertical-align: bottom;
@@ -2359,6 +2368,11 @@ fieldset[disabled] .btn-link:focus {
   font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
+  border-color: #333333;
+}
+.btn-sm:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-color: #1b1b1b;
 }
 
 .btn-xs {
@@ -2370,6 +2384,16 @@ fieldset[disabled] .btn-link:focus {
   width: 100%;
   padding-right: 0;
   padding-left: 0;
+  background-color:#434d89;
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.btn-block:hover {
+    background-color: #ffffff;
+    color: #434d89;
+    border-color: #434d89;
+
 }
 
 .btn-block + .btn-block {
