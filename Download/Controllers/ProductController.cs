@@ -39,12 +39,14 @@ namespace Download.Controllers
             //open database connection
             using (var db = new ProductDBContext())
             {
+                int skip = (int)(pageNumber - 1) * 10;
+                int take = (int)pageNumber * 10;
 
                 //blank search, return all products
                 if (searchString == "" || searchString == null)
                 {
                     //Return all products in Alphabetical Order
-                    products = db.Products.OrderBy(p => p.ProductName).ToList();
+                    products = db.Products.OrderBy(p => p.ProductName).Where(x => x.ProductStatus > 0).ToList();
 
                 }
                 //user entered a search, return matching products
@@ -53,23 +55,21 @@ namespace Download.Controllers
                     //if the search string is not empty, then only return the matching products to the user
                     //Return the search results in alphabetical order
                     //products = products.Where(s => s.ProductName.Contains(searchString));
-                    products = db.Products.Where(s => s.ProductName.Contains(searchString)).OrderBy(p => p.ProductName).ToList();
+                    products = db.Products.Where(s => s.ProductName.Contains(searchString)).Where(x => x.ProductStatus > 0).OrderBy(p => p.ProductName).ToList();
                     page = 1;
                 }
 
-                //Show only the visible products
-                products = products.Where(x => x.ProductStatus > 0).ToList();
-                //If there are no products in the database, display a blank Index
-                if (products.Count() == 0 && searchString != null)
-                {
 
-                    //return the ToPagedList to add paging to the display
-                    ViewBag.Message = "No Matches Found, Please try a different search";
-                    return View(products.ToPagedList(pageNumber, pageSize));
-                }
 
             }
+            //If there are no products in the database, display a blank Index
+            if (products.Count() == 0 && searchString != null)
+            {
+                //return the ToPagedList to add paging to the display
+                ViewBag.Message = "No Matches Found, Please try a different search";
+            }
             ViewData["page"] = pageNumber;
+            //return the ToPagedList to add paging to the display
             return View(products.ToPagedList(pageNumber, pageSize));
         }
         //Not Used but kept just in case
@@ -510,12 +510,6 @@ namespace Download.Controllers
                 {
                     Product prod = new Product();
                     prod.ProductName = product.ProductName;
-                    //Check to see if the user entered a product name and if not display error message
-                    if (product.ProductName == null)
-                    {
-                        TempData["message"] = "Product Name is required";
-                        return RedirectToAction("Create");
-                    }
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
                     var LastArchive = db.Archives.ToList().Last();
@@ -1297,7 +1291,7 @@ namespace Download.Controllers
                     //if there was an error, then redirect to the same page
                 }
             }
-            return RedirectToAction("Display", new { id = id, searchString = searchString, page = page });
+            return RedirectToAction("Display", new { id = id, searchString = searchString, page = page, VersionId = verId });
         }
 
         //this method gets the proper index of the folder that the product is in

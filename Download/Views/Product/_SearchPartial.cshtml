@@ -6,72 +6,86 @@
     ViewBag.Title = "_SearchPartial";
     //this allows to view to see what was previously typed into the search bar
 
-    var search = ViewData["search"]; 
+    var search = ViewData["search"];
     var pageNum = ViewData["page"];
-    
-}
-<div class="body-content" >
 
-    <p>
-        @if (User.IsInRole("admin"))
-        {
-            <h4>@Html.ActionLink("Create New", "Create", new { searchString = search, page = pageNum }, new { @class="btn btn-info" })</h4>
-        }
-        @using (Html.BeginForm(new { page = 1 }))
-        {
+}
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<div class="body-content">
+
+
+    @if (User.IsInRole("admin"))
+    {
+        <h4>@Html.ActionLink("Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</h4>
+    }
+    <br />
+    @using (Html.BeginForm(new { page = 1 }))
+    {
         <p>
             @*The default text in the search bar is the text from the last search*@
             <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
             <input type="submit" value="Search" class="btn btn-info" />
         </p>
+    }
+
+
+    <table class="table table-hover col-md-12" style="background-color: rgba(255, 255, 255, 0.00);">
+
+        @foreach (var item in Model)
+        {
+
+
+            <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;">
+                <td style="font-size: larger; font-style: initial" class="row">
+                    @item.ProductName
+                </td>
+                <td id="download">
+                    @using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum }))
+                    {
+                        <input type="submit" value="Download" class="btn btn-primary fade" id="thedownload" />
+                    }
+                </td>
+
+                @if (User.IsInRole("admin") == true)
+                {
+                    <td class="row">
+                        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" }) |
+                        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" })
+                    </td>
+                }
+
+            </tr>
+
+
         }
-        </p>
 
-        <table class="table table-hover col-md-12" style="background-color: rgba(255, 255, 255, 0.00);">
-
-
-
-            @foreach (var item in Model)
-            {
-
-
-                    <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;" >
-                        <td style="font-size: larger; font-style: initial" class="row">
-                            @item.ProductName
-                        </td>
-                        <td class="row">
-                            @using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum}))
-                            {
-                            <input type="submit" value="Download" class="btn btn-primary" />
-                            }
-                        </td>
-                        
-                        @if (User.IsInRole("admin") == true)
-{
-    <td class="row" >
-        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" }) |
-        @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit" })
-    </td>
-}
-                        
-                    </tr>
-
-
-            }
-
-        </table>
+    </table>
     <div class="text-danger">@ViewBag.Message</div>
-        <br />
+    <br />
     @*Dispaly no pagers on intial display of the page becuase no products are shown*@
-    @if(Model.PageCount > 0){
+    @if (Model.PageCount > 0)
+    {
         <div>
-    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-    @*If there is zero or one page, no need to display page links*@
-    @if (Model.PageCount > 1) { 
-    @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page, searchString = search }))
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+            @*If there is zero or one page, no need to display page links*@
+            @if (Model.PageCount > 1)
+            {
+                @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page, searchString = search }))
+            }
+        </div>
     }
-            </div>
-    }
-    </div>
+</div>
 
-
+    <script>
+        $(function () {
+            var download = function () {
+                $("thedownload").fadeIn(1);
+                $("thedownload").fadeout(1);
+                };
+            $("#download").hover(download);
+        });
+        
+    </script>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

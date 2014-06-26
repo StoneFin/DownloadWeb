@@ -117,12 +117,13 @@
 
                 break;
         }
-        <hr />
+
 
         <div>
             @*If there is more than just the version being shown up above, display links to the additional versions*@
             @if (Model.Versions.Count() > 1)
             {
+                <hr />
                 <h4>Archived Versions</h4>
             }
             <div>
