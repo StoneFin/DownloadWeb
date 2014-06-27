@@ -13,20 +13,27 @@
 <div class="body-content">
 
 
-    @if (User.IsInRole("admin"))
-    {
-        <h4>@Html.ActionLink("+ Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</h4>
-    }
-    <br />
-    @using (Html.BeginForm(new { page = 1 }))
-    {
-        <p>
-            @*The default text in the search bar is the text from the last search*@
-            <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
-            <input type="submit" value="Search" class="btn btn-info" />
-        </p>
-    }
 
+    <div class="clearfix form-group" style="margin-left: 0px;">
+        @using (Html.BeginForm(new { page = 1 }))
+        {
+
+                @*The default text in the search bar is the text from the last search*@
+
+                <div class="col-md-8">
+                    <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
+                    <input type="submit" value="Search" class="btn btn-info" />
+                </div>
+                <div class="col-md-2 col-md-offset-2">
+                    @if (User.IsInRole("admin"))
+                    {
+                        <span>@Html.ActionLink("+ Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</span>
+                    }
+                </div>
+
+
+        }
+    </div>
 
     <table class="table table-hover" style="background-color: rgba(255, 255, 255, 0.00);">
 

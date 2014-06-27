@@ -190,10 +190,7 @@ namespace Download.Controllers
                                     }
 
                                 }
-                                foreach (var ex in version.ExtraFiles)
-                                {
-
-                                }
+                                version.ExtraFiles = version.ExtraFiles.Where(x => x.ExFileStatus > 0).ToList();
                                 break;
                             }
 
@@ -230,10 +227,7 @@ namespace Download.Controllers
 
                                 break;
                             }
-                            foreach (var ex in version.ExtraFiles)
-                            {
-
-                            }
+                            version.ExtraFiles = version.ExtraFiles.Where(x => x.ExFileStatus > 0).ToList();
                             break;
                         }
 
@@ -372,6 +366,7 @@ namespace Download.Controllers
                                             fileName = file.FileName;
                                             Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                             ProductExFiles.FileName = fileName;
+                                            //convert the content length to bytes, and allow 3 decimal places of accuracy
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             if (!Directory.Exists(filePath))
                                             {
@@ -380,6 +375,7 @@ namespace Download.Controllers
                                             fileName = CurrExId + fileName;
                                             var path = Path.Combine(filePath, fileName);
                                             file.SaveAs(path);
+                                            ProductExFiles.ExFileStatus = 1;
                                             ProductExFiles.Versions.Add(ProductVersion);
                                             ProductVersion.ExtraFiles.Add(ProductExFiles);
                                             i++;
@@ -570,6 +566,7 @@ namespace Download.Controllers
                                             fileName = CurrExId + fileName;
                                             var path = Path.Combine(filePath, fileName);
                                             file.SaveAs(path);
+                                            ProductExFiles.ExFileStatus = 1;
                                             ProductExFiles.Versions.Add(ProductVersion);
                                             ProductVersion.ExtraFiles.Add(ProductExFiles);
                                             i++;
@@ -761,10 +758,7 @@ namespace Download.Controllers
                     {
 
                     }
-                    foreach (var ex in version.ExtraFiles)
-                    {
-
-                    }
+                    version.ExtraFiles = version.ExtraFiles.Where(x => x.ExFileStatus > 0).ToList();
                 }
 
             }
@@ -822,10 +816,7 @@ namespace Download.Controllers
 
                 }
                 //Popluate the Extra Files
-                foreach (var ex in version.ExtraFiles)
-                {
-
-                }
+                version.ExtraFiles = version.ExtraFiles.Where(x => x.ExFileStatus > 0).ToList();
 
 
             }
@@ -888,7 +879,7 @@ namespace Download.Controllers
                     {
                         ExFile.Add(ex);
                     }
-
+                    ExFile = ExFile.Where(x => x.ExFileStatus > 0).ToList();
 
                     string CurrArchId = ArchIndex.ToString() + "_";
                     //Add the files to the appropriate folder based on the name, such as '.exe', or 'ReadMe'
@@ -935,6 +926,7 @@ namespace Download.Controllers
                                         fileName = CurrExId + fileName;
                                         var path = Path.Combine(filePath, fileName);
                                         file.SaveAs(path);
+                                        ProductExFiles.ExFileStatus = 1;
                                         ProductExFiles.Versions.Add(vers);
                                         vers.ExtraFiles.Add(ProductExFiles);
                                         i++;
@@ -965,6 +957,7 @@ namespace Download.Controllers
                                             ProductExFiles.FileName = fileName;
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             ProductExFiles.FileDescription = Description[j];
+                                            ProductExFiles.ExFileStatus = 1;
                                             if (!Directory.Exists(filePath))
                                             {
                                                 Directory.CreateDirectory(filePath);
@@ -972,7 +965,7 @@ namespace Download.Controllers
                                             fileName = CurrExId + fileName;
                                             var path = Path.Combine(filePath, fileName);
                                             file.SaveAs(path);
-                                            vers.ExtraFiles.Remove(ExFile[j]);
+                                            ExFile[j].ExFileStatus = 0;
                                             ProductExFiles.Versions.Add(vers);
                                             vers.ExtraFiles.Add(ProductExFiles);
                                             l++;
@@ -1211,7 +1204,7 @@ namespace Download.Controllers
             {
                 versions = db.Versions.Find(Vid);
                 ExFile = db.ExtraFiles.Find(Fid);
-                versions.ExtraFiles.Remove(ExFile);
+                ExFile.ExFileStatus = 0;
                 db.SaveChanges();
             }
             return RedirectToAction("EditVersion", new { id = Vid, searchString = searchString, page = page });

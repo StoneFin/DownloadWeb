@@ -75,6 +75,7 @@ namespace Download.Models
             public string FileName { get; set; }
             public string FileDescription { get; set; }
             public string FileSize { get; set; }
+            public int ExFileStatus { get; set; }
         }
 
     
