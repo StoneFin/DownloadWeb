@@ -57,7 +57,9 @@ namespace Download.Models
             public string Installer { get; set; }
             public string Exe { get; set; }
             public string ReadMe { get; set; }
-
+            public string ExeSize { get; set; }
+            public string InstallerSize { get; set; }
+            public string ReadMeSize { get; set; }
            [DataType(DataType.Date)]
            public DateTimeOffset DateUploaded { get; set; }
 
@@ -72,6 +74,7 @@ namespace Download.Models
             public int ExtraFileId { get; set; }
             public string FileName { get; set; }
             public string FileDescription { get; set; }
+            public string FileSize { get; set; }
         }
 
     

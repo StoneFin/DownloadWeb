@@ -10,43 +10,44 @@
 
 }
 
-<h2 style="margin-bottom: 0px;">@Model.ProductName</h2>
-<hr style="margin-top: 0px;" />
+<h2 style="margin-bottom: 0px; background-color: #808080; color: #ffffff;">@Model.ProductName</h2>
+
 @*Check to see if there are any versions available for display/download*@
-<div class="body-content form-horizontal clearfix">
+<div class="body-content form-horizontal clearfix" style="margin-top: 0px;">
+
     @if (Model.Versions.Count() > 0)
     {
 
+        <div class="form-group clearfix" style="border: 2px solid #ffffff; margin-bottom: 0px; ">
 
 
+            @foreach (var version in Model.Versions)
+            {
+                <div class="form-group">
+                    <div class="col-md-2">
+                        <b>@Html.DisplayNameFor(model => version.VersionName)</b>
+                    </div>
+                    <div class="col-md-2">
+                        @Html.Encode(version.VersionName)
+                    </div>
+                </div>
+                break;
+            }
 
-        foreach (var version in Model.Versions)
-        {
-            <div class="form-group">
-                <div class="col-md-1">
-                    <b>@Html.DisplayNameFor(model => version.VersionName)</b>
+            @foreach (var date in Model.Versions)
+            {
+                <div class="form-group">
+                    <div class="col-md-2">
+                        <b>@Html.Encode("Date Uploaded")</b>
+                    </div>
+                    <div class="col-md-2">
+                        @Html.DisplayFor(model => date.DateCreated)
+                    </div>
                 </div>
-                <div class="col-md-1">
-                    @Html.Encode(version.VersionName)
-                </div>
-            </div>
-            break;
-        }
+                break;
+            }
+            <div class="text-danger">@ViewBag.Message</div>
 
-        foreach (var date in Model.Versions)
-        {
-            <div class="form-group">
-                <div class="col-md-1">
-                    <b>@Html.Encode("Date Uploaded")</b>
-                </div>
-                <div class="col-md-2">
-                    @Html.DisplayFor(model => date.DateCreated)
-                </div>
-            </div>
-            break;
-        }
-        <div class="text-danger">@ViewBag.Message</div>
-        <div class="form-group clearfix" style="border: 2px solid #ffffff; margin-bottom: 0px; border-bottom: 0px;">
             @foreach (var version in Model.Versions)
             {
 
@@ -57,7 +58,8 @@
 
                         using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Installer, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-3" }))
                         {
-                            <b>@arch.Installer</b><br />
+                            <b>@arch.Installer</b> <span>(@arch.InstallerSize KB)</span>
+                            <br />
                             <input type="submit" value="Download Installer" class="btn btn-primary" style="margin-bottom: 4px;" />
 
                         }
@@ -67,7 +69,8 @@
 
                         using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = arch.Exe, verId = version.VersionId, archId = arch.ArchiveId, searchString = search, page = pageNum }, FormMethod.Post, new { @class = "col-md-3" }))
                         {
-                            <b>@arch.Exe</b><br />
+                            <b>@arch.Exe</b> <span>(@arch.ExeSize KB)</span>
+                            <br />
                             <input type="submit" value="Download Exe" class="btn btn-primary" />
                         }
                     }
@@ -78,16 +81,19 @@
             <br />
 
         </div>
+        <br />
+        <div class="clearfix form-group" style="margin-bottom: 0px;">
+            @if (Model.Versions[0].ExtraFiles.Count() != 0)
+            {
+                <h5 style="margin-bottom: 0px; margin-top: 0px; background-color: #808080; color: #ffffff;">Extra Files</h5>
+            }
+        </div>
         <div class="form-group clearfix" style="border: 2px solid #ffffff; margin-top: 0px; margin-bottom: 0px;">
 
             @foreach (var version in Model.Versions)
             {
 
-                if (Model.Versions[0].ExtraFiles.Count() != 0)
-                {
-                    <h5 style="margin-bottom: 0px;"><b>Extra Files</b></h5>
-                    <hr style="margin-top: 0px;" />
-                }
+
                 foreach (var ex in version.ExtraFiles)
                 {
                     if (ex != null)
@@ -95,6 +101,7 @@
                         <div class="col-md-3">
 
                             <b> @Html.DisplayFor(model => ex.FileName) </b>
+                            (@ex.FileSize KB)
                             @using (Html.BeginForm("Download", "Product", new { id = Model.Id, fileName = ex.FileName, fileId = ex.ExtraFileId, verId = version.VersionId, searchString = search, page = pageNum }, FormMethod.Post))
                             {
 
@@ -111,39 +118,50 @@
             }
 
         </div>
-        <div style="border: 2px solid #ffffff; border-top: 0px; margin-top: 0px; margin-bottom: 0px;" class="clearfix form-group">
-            @*If there is more than just the version being shown up above, display links to the additional versions*@
-            @if (Model.Versions.Count() > 1)
-            {
-                <h4 style="margin-bottom: 0px;">Archived Versions</h4>
-                <hr style="margin-top: 0px;" />
-            }
+        <br />
+        if (Model.Versions.Count() > 1)
+        {
+            <div class="clearfix form-group" style="margin-bottom: 0px;">
 
-                    @foreach (var version in Model.Versions)
+                <h5 style="margin-bottom: 0px; margin-top: 0px; background-color: #808080; color: #ffffff;">Archived Versions</h5>
+
+
+            </div>
+            <div style="border: 2px solid #ffffff; border-top: 0px; margin-top: 0px; margin-bottom: 0px;" class="clearfix form-group">
+                @*If there is more than just the version being shown up above, display links to the additional versions*@
+
+
+                @foreach (var version in Model.Versions)
+                {
+                    //Skip the first version becuase it is being displayed
+                    if (i == 0)
                     {
-                        //Skip the first version becuase it is being displayed
-                        if (i == 0)
-                        {
-                            i++;
-                        }
-                        else
-                        {
-                                    @*table of archived versions for this product*@
-                                    @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId, searchString = search, page = pageNum })<br />
-
-                        }
+                        i++;
                     }
+                    else
+                    {
+                        @*table of archived versions for this product*@
+                        @Html.ActionLink(version.VersionName, "Display", new { id = Model.Id, VersionId = version.VersionId, searchString = search, page = pageNum })<br />
 
+                    }
+                }
+
+            </div>
+            <br />
+        }
+
+        <div class="clearfix form-group" style="margin-bottom: 0px;">
+            <h5 style="margin-bottom: 0px; margin-top: 0px; background-color: #808080; color: #ffffff; ">Read Me</h5>
         </div>
-      <div class="form-group clearfix" style="border: 2px solid #ffffff; border-top: 0px; margin-top: 0px">
-        <h3 style="margin-bottom: 0px;">Read Me</h3>
-          <hr style="margin-top: 0px;"/>
+        <div class="form-group clearfix" style="border: 2px solid #ffffff; margin-top: 0px">
 
 
-          <div style="margin-left: 20px">
-            @*Display the Markdown readme that was converted to html*@
-            @Html.Raw(file)
-              </div>
+
+
+            <div style="margin-left: 20px">
+                @*Display the Markdown readme that was converted to html*@
+                @Html.Raw(file)
+            </div>
         </div>
 
 

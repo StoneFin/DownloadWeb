@@ -216,6 +216,10 @@
     <Compile Include="MigrationData\ProductMigrations\201406231402455_Adding restrictions to ProductName.Designer.cs">
       <DependentUpon>201406231402455_Adding restrictions to ProductName.cs</DependentUpon>
     </Compile>
+    <Compile Include="MigrationData\ProductMigrations\201406271528489_AddingFileSize.cs" />
+    <Compile Include="MigrationData\ProductMigrations\201406271528489_AddingFileSize.Designer.cs">
+      <DependentUpon>201406271528489_AddingFileSize.cs</DependentUpon>
+    </Compile>
     <Compile Include="MigrationData\ProductMigrations\Configuration.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.cs" />
     <Compile Include="MigrationData\UserMigrations\201406102204488_InitialCreate.Designer.cs">
@@ -354,6 +358,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\ProductMigrations\201406231402455_Adding restrictions to ProductName.resx">
       <DependentUpon>201406231402455_Adding restrictions to ProductName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MigrationData\ProductMigrations\201406271528489_AddingFileSize.resx">
+      <DependentUpon>201406271528489_AddingFileSize.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MigrationData\UserMigrations\201406102204488_InitialCreate.resx">
       <DependentUpon>201406102204488_InitialCreate.cs</DependentUpon>

@@ -28,7 +28,7 @@ namespace Download.Controllers
             List<ApplicationUser> users;
             using (var db = new ApplicationDbContext())
             {
-                users = db.Users.ToList();
+                users = db.Users.OrderBy(u => u.UserName).ToList();
 
                 foreach (var User in users)
                 {

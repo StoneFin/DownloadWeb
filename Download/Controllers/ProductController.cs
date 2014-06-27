@@ -372,6 +372,7 @@ namespace Download.Controllers
                                             fileName = file.FileName;
                                             Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                             ProductExFiles.FileName = fileName;
+                                            ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             if (!Directory.Exists(filePath))
                                             {
                                                 Directory.CreateDirectory(filePath);
@@ -391,6 +392,7 @@ namespace Download.Controllers
                             else if (fileName.Contains(".exe"))
                             {
                                 ProductArchive.Exe = fileName;
+                                ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -404,6 +406,7 @@ namespace Download.Controllers
                             else if (fileName.Contains("ReadMe"))
                             {
                                 ProductArchive.ReadMe = fileName;
+                                ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -424,6 +427,7 @@ namespace Download.Controllers
                             else
                             {
                                 ProductArchive.Installer = fileName;
+                                ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -447,14 +451,14 @@ namespace Download.Controllers
 
                         if (ProductVersion.VersionName == null)
                         {
-                            ProductVersion.VersionName = "No info";
+                            ProductVersion.VersionName = "No Info";
                         }
 
                     }
-                    //If there still is no version name, then we have no information on the version, so the default version is 'no info'
+                    //If there still is no version name, then we have no information on the version, so the default version is 'no Info'
                     if (ProductVersion.VersionName == null)
                     {
-                        ProductVersion.VersionName = "No info";
+                        ProductVersion.VersionName = "No Info";
                     }
                     ProductArchive.DateUploaded = DateTime.Now;
                     ProductVersion.Archives.Add(ProductArchive);
@@ -558,6 +562,7 @@ namespace Download.Controllers
                                             fileName = file.FileName;
                                             Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                             ProductExFiles.FileName = fileName;
+                                            ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             if (!Directory.Exists(filePath))
                                             {
                                                 Directory.CreateDirectory(filePath);
@@ -577,6 +582,7 @@ namespace Download.Controllers
                             else if (fileName.Contains(".exe"))
                             {
                                 ProductArchive.Exe = fileName;
+                                ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -590,6 +596,7 @@ namespace Download.Controllers
                             else if (fileName.Contains("ReadMe"))
                             {
                                 ProductArchive.ReadMe = fileName;
+                                ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -610,6 +617,7 @@ namespace Download.Controllers
                             else
                             {
                                 ProductArchive.Installer = fileName;
+                                ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -633,7 +641,7 @@ namespace Download.Controllers
 
                         if (ProductVersion.VersionName == null)
                         {
-                            ProductVersion.VersionName = "No info";
+                            ProductVersion.VersionName = "No Info";
                         }
 
                     }
@@ -919,6 +927,7 @@ namespace Download.Controllers
                                         fileName = file.FileName;
                                         Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                         ProductExFiles.FileName = fileName;
+                                        ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                         if (!Directory.Exists(filePath))
                                         {
                                             Directory.CreateDirectory(filePath);
@@ -935,44 +944,49 @@ namespace Download.Controllers
 
                                 }
                             }
-                            else if (FileName == "FileUpload4" && k < 1)
+                            else if (FileName == "FileUpload4")
                             {
-                                var uploadFiles = Request.Files.GetMultiple(FileName);
-                                foreach (var file in uploadFiles)
+                                if (k < 1)
                                 {
-                                    if (file.FileName.CompareTo("") == 0)
+                                    var uploadFiles = Request.Files.GetMultiple(FileName);
+                                    foreach (var file in uploadFiles)
                                     {
-                                        ExFile[j].FileDescription = Description[j];
-                                        j++;
-                                    }
-                                    else
-                                    {
-                                        fileName = file.FileName;
-                                        var LastExFile = db.ExtraFiles.ToList().Last();
-                                        string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
-                                        ExtraFile ProductExFiles = new ExtraFile();
-                                        ProductExFiles.FileName = fileName;
-                                        ProductExFiles.FileDescription = Description[j];
-                                        if (!Directory.Exists(filePath))
+                                        if (file.FileName.CompareTo("") == 0)
                                         {
-                                            Directory.CreateDirectory(filePath);
+                                            ExFile[j].FileDescription = Description[j];
+                                            j++;
                                         }
-                                        fileName = CurrExId + fileName;
-                                        var path = Path.Combine(filePath, fileName);
-                                        file.SaveAs(path);
-                                        vers.ExtraFiles.Remove(ExFile[j]);
-                                        ProductExFiles.Versions.Add(vers);
-                                        vers.ExtraFiles.Add(ProductExFiles);
-                                        l++;
-                                        j++;
+                                        else
+                                        {
+                                            fileName = file.FileName;
+                                            var LastExFile = db.ExtraFiles.ToList().Last();
+                                            string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
+                                            ExtraFile ProductExFiles = new ExtraFile();
+                                            ProductExFiles.FileName = fileName;
+                                            ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
+                                            ProductExFiles.FileDescription = Description[j];
+                                            if (!Directory.Exists(filePath))
+                                            {
+                                                Directory.CreateDirectory(filePath);
+                                            }
+                                            fileName = CurrExId + fileName;
+                                            var path = Path.Combine(filePath, fileName);
+                                            file.SaveAs(path);
+                                            vers.ExtraFiles.Remove(ExFile[j]);
+                                            ProductExFiles.Versions.Add(vers);
+                                            vers.ExtraFiles.Add(ProductExFiles);
+                                            l++;
+                                            j++;
+                                        }
                                     }
+                                    k++;
                                 }
-                                k++;
 
                             }
                             else if (fileName.Contains(".exe"))
                             {
                                 arch.Exe = fileName;
+                                arch.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -986,6 +1000,7 @@ namespace Download.Controllers
                             else if (fileName.Contains("ReadMe"))
                             {
                                 arch.ReadMe = fileName;
+                                arch.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
@@ -1006,6 +1021,7 @@ namespace Download.Controllers
                             else
                             {
                                 arch.Installer = fileName;
+                                arch.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 if (!Directory.Exists(filePath))
                                 {
                                     Directory.CreateDirectory(filePath);
