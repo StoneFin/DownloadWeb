@@ -35,15 +35,12 @@
                     <div>
                         @if (arch.Exe != null)
                         {
-                            <p>
+
                                 <b>(currently) @arch.Exe</b> <input type="file" name="FileUpload1" />
-                            </p>
                         }
                         else
                         {
-                            <p>
                                 <b>Select an .exe:</b> <input type="file" name="FileUpload1" />
-                            </p>
                         }
                     </div>
                 </fieldset>
@@ -53,15 +50,11 @@
                     <div>
                         @if (arch.Installer != null)
                         {
-                            <p>
                                 <b>(currently) @arch.Installer</b> <input type="file" name="FileUpload2" />
-                            </p>
                         }
                         else
                         {
-                            <p>
                                 <b>Select an Installer:</b> <input type="file" name="FileUpload2" />
-                            </p>
                         }
                     </div>
                 </fieldset>

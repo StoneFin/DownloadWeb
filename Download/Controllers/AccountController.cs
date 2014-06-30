@@ -179,6 +179,8 @@ namespace Download.Controllers
 
             bool success = false;
             //use the regular expression to check to see if it's a valid email address, if not, retun error message
+            if (email != null)
+            {
                 if (System.Text.RegularExpressions.Regex.IsMatch(email, @"^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-‌​]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$") == true)
                 {
                     using (var db = new ApplicationDbContext())
@@ -189,6 +191,7 @@ namespace Download.Controllers
                         success = true;
                     }
                 }
+            }
             
             //If the change password form is blank, then the user only wanted to change thier email, so dislpaly success message
             //Also check to see if it is has some basic email adress format

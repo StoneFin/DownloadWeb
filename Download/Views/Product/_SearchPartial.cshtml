@@ -45,7 +45,7 @@
                 <td style="font-size: larger;" class="col-md-4">
                     @item.ProductName
                 </td>
-                <td class="col-md-4">
+                <td class="col-md-6">
                     @using (Html.BeginForm("Display", "Product", new { id = item.ProductId, searchString = search, page = pageNum }))
                     {
                         <input type="submit" value="Download" class="btn btn-block" />
@@ -54,7 +54,7 @@
 
                 @if (User.IsInRole("admin") == true)
                 {
-                    <td class="col-md-2 col-md-offset-2 row">
+                    <td class="col-md-1 row">
                         @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" }) |
                         @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" })
                     </td>

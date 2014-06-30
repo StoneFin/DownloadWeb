@@ -10,9 +10,9 @@
 
 }
 
-<h2 style="background-color: #808080; color: #ffffff;">Create Product</h2>
+<h2 style="background-color: #808080; color: #ffffff; margin-bottom: 0px;">Create Product</h2>
 
-<div style="background-color: rgba(255, 255, 255, 0.23); border: 2px solid #ffffff" class="clearfix form-horizontal">
+<div style="background-color: rgba(255, 255, 255, 0.23); border: 2px solid #ffffff; margin-top: 0px; padding-top: 10px;" class="clearfix form-horizontal">
     @using (Html.BeginForm("Create", "Product", new { searchString = search, page = pageNum }, FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
@@ -22,10 +22,8 @@
         <div class="form-group">
             @Html.Label("Product Name", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                <p>
                     @Html.EditorFor(model => model.ProductName)
                     @Html.ValidationMessageFor(model => model.ProductName)   
-                </p>
 
             </div>
         </div>

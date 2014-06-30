@@ -136,6 +136,8 @@ namespace Download.Controllers
                 {
                     return RedirectToAction("Index");
                 }
+                ProductModel.ProductName = product.ProductName;
+                ProductModel.Id = product.ProductId;
                 //populate archives so the product can find the corresponding archives
                 var archives = (from p in db.Products
                                 join v in db.Versions
@@ -144,8 +146,7 @@ namespace Download.Controllers
                                 on v.VersionId equals a.VersionId
                                 where p.ProductId == id
                                 select a).ToList();
-                ProductModel.ProductName = product.ProductName;
-                ProductModel.Id = product.ProductId;
+
                 //populate versions so the product can find the corresponding versions
                 var Versions = (from p in db.Products
                                 join v in db.Versions

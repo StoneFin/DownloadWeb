@@ -10,8 +10,8 @@
 @using (Html.BeginForm("Manage", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
 {
     @Html.AntiForgeryToken()
-    <h4>Change Email</h4>
-    <hr />
+    <h4 style="margin-bottom: 0px;">Change Email</h4>
+    <hr style="margin-top: 0px;"/>
     @Html.ValidationSummary()
     <div class="form-group">
         @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })

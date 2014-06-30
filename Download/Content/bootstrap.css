@@ -2395,6 +2395,9 @@ fieldset[disabled] .btn-link:focus {
     border-color: #434d89;
 
 }
+btn-block:active{
+    color: #ffffff;
+}
 
 .btn-block + .btn-block {
   margin-top: 5px;
