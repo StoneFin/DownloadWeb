@@ -8,21 +8,34 @@
 }
 <h2>Remove</h2>
 <div style="background-color: rgba(255, 255, 255, 0.30)">
-    <h3>Are you sure you want to remove @Model.VersionName?</h3>
+    <h3>Are you sure you want to remove Version @Model.VersionName?</h3>
     <hr />
     <h4>
         This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
         go into the database and change the status column
     </h4>
 
-    @using (Html.BeginForm("RemoveVersion", "Product", new { searchString = search, page = pageNum, ProductId = Model.ProductId }))
-    {
-        @Html.AntiForgeryToken()
 
-        <div class="form-actions no-color">
-            <input type="submit" value="Remove Version" class="btn btn-danger" /> |
-            @Html.ActionLink("Back to Versions", "Edit", new { id = Model.ProductId, searchString = search, page = pageNum })
+
+    <div class="form-actions no-color clearfix">
+        <div class="col-md-2">
+            @using (Html.BeginForm("RemoveVersion", "Product", new { searchString = search, page = pageNum, ProductId = Model.ProductId }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="submit" value="Remove Version" class="btn btn-danger" />
+            }
         </div>
-    }
+        <div class="col-md-2 col-md-offset-2" >
+
+            @using (Html.BeginForm("Edit", "Product", new { searchString = search, page = pageNum, id = Model.ProductId }, FormMethod.Get))
+            {
+                @Html.ValidationSummary()
+                @Html.AntiForgeryToken()
+                <input type="submit" value="CANCEL" class="btn btn-primary" />
+            }
+            </div>
+    </div>
+
 </div>
+
 

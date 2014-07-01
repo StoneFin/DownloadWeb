@@ -23,14 +23,14 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     @if(User.IsInRole("admin") == true){
-                    <li>@Html.ActionLink("Users", "Index", "Users")</li>
+                    <li>@Html.ActionLink("Manage Users", "Index", "Users")</li>
                     }
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
         </div>
     </div>
-    <div class="container body-content" style="background-color: rgba(0, 0, 0, 0.15); border: 2px solid #434d89; ">
+    <div class="container body-content" style="background-color: rgba(0, 0, 0, 0.15);  ">
         @RenderBody()
         <hr />
         <footer>

@@ -9,17 +9,29 @@
 <div style="background-color: rgba(255, 255, 255, 0.30)">
     <h3>Are you sure you want to remove @Model.ProductName?</h3>
     <hr />
-    <h4>This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
-     go into the database and change the status column</h4>
+    <h4>
+        This will NOT perminately delete the item from the database, it will only make the item invisible to all users. In order to restore a removed item, you must manually
+        go into the database and change the status column
+    </h4>
 
-    @using (Html.BeginForm("Remove", "Product", new { searchString = search, page = pageNum }))
-    {
-        @Html.AntiForgeryToken()
 
-        <div class="form-actions no-color">
-            <input type="submit" value="Remove" class="btn btn-danger" /> |
-            @Html.ActionLink("Back to List", "Index", new { searchString = search, page = pageNum })
+    @Html.AntiForgeryToken()
+
+    <div class="form-actions no-color clearfix">
+        <div class="col-md-2">
+            @using (Html.BeginForm("Remove", "Product", new { searchString = search, page = pageNum }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="submit" value="REMOVE" class="btn btn-danger" />
+            }
         </div>
-    }
-</div>
+        <div class="col-md-2 col-md-offset-2">
+            @using (Html.BeginForm("Index", "Product", new { searchString = search, page = pageNum }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="submit" value="CANCEL" class="btn btn-primary" />
+            }
+        </div>
+    </div>
 
+</div>

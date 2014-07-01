@@ -16,14 +16,27 @@
         go into the database and change the status column
     </h4>
 
-    @using (Html.BeginForm("RemoveFile", "Product", new { searchString = search, Vid = Vid, Fid = Model.ExtraFileId, page = page }))
-    {
-        @Html.AntiForgeryToken()
 
-        <div class="form-actions no-color">
-            <input type="submit" value="Remove File" class="btn btn-danger" /> |
-            @Html.ActionLink("Cancel", "EditVersion", new { id = Vid, searchString = search, page = page })
+
+    <div class="form-actions no-color clearfix">
+        <div class="col-md-2">
+            @using (Html.BeginForm("RemoveFile", "Product", new { searchString = search, Vid = Vid, Fid = Model.ExtraFileId, page = page }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary()
+                <input type="submit" value="Remove File" class="btn btn-danger" />
+            }
         </div>
-    }
+        <div class="col-md-2 col-md-offset-2">
+            @using (Html.BeginForm("EditVersion", "Product", new { searchString = search, page = page, id = Vid }, FormMethod.Get))
+            {
+                @Html.ValidationSummary()
+                @Html.AntiForgeryToken()   
+                <input type="submit" value="CANCEL" class="btn btn-primary" />
+            }
+        </div>
+    </div>
+
 </div>
+
 

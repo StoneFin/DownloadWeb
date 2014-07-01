@@ -15,24 +15,38 @@
 
 
     <div class="clearfix form-group" style="margin-left: 0px;">
-        @using (Html.BeginForm(new { page = 1 }))
-        {
 
-                @*The default text in the search bar is the text from the last search*@
 
-                <div class="col-md-8">
-                    <b>Search Products: </b>@Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
-                    <input type="submit" value="Search" class="btn btn-info" />
+        @*The default text in the search bar is the text from the last search*@
+
+        <div class="col-md-8">
+            @using (Html.BeginForm(new { page = 1 }))
+            {
+                <b>Search Products: </b>
+                <div class="btn-group">
+                    @Html.TextBox("searchString", search, new { @style = "text-align: left;", @class = "btn btn-default", @autocomplete = "on" })
+                    <button type="submit" class="btn btn-info">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
                 </div>
-                <div class="col-md-2 col-md-offset-2">
-                    @if (User.IsInRole("admin"))
-                    {
-                        <span>@Html.ActionLink("+ Create New Product", "Create", new { searchString = search, page = pageNum }, new { @class = "btn btn-info" })</span>
-                    }
-                </div>
+            }
+        </div>
+        <div class="col-md-2 col-md-offset-2">
+            @if (User.IsInRole("admin"))
+            {
+                using (Html.BeginForm("Create", "Product", FormMethod.Get, new { searchString = search, page = pageNum }))
+                {
+                    @Html.ValidationSummary()
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-info">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Create New Product
+                    </button>
+                }
+            }
+        </div>
 
 
-        }
+
     </div>
 
     <table class="table table-hover" style="background-color: rgba(255, 255, 255, 0.00);">
