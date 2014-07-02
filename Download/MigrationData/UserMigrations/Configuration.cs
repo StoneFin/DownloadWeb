@@ -30,20 +30,7 @@ namespace Download.MigrationData.UserMigrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
-            if (!context.Users.Any(u => u.UserName == "Ethan"))
-            {
-                var roleStore = new RoleStore<IdentityRole>(context);
-                var roleManager = new RoleManager<IdentityRole>(roleStore);
-                var userStore = new UserStore<ApplicationUser>(context);
-                var userManager = new UserManager<ApplicationUser>(userStore);
-                var user = new ApplicationUser { UserName = "Ethan", Email = "seeded@working.com" };
 
-                userManager.Create(user, "000000");
-                roleManager.Create(new IdentityRole { Name = "admin" });
-                roleManager.Create(new IdentityRole { Name = "member" });
-                roleManager.Create(new IdentityRole { Name = "non-validated member" });
-                userManager.AddToRole(user.Id, "admin");
-            }
         }
     }
 }
