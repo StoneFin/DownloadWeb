@@ -28,7 +28,7 @@ namespace Download.Models
     {
 
         public ApplicationDbContext()
-            : base("DefaultConnection")
+            : base("ProductDBContext")
         {
         }
 

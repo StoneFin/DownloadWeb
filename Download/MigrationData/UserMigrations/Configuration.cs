@@ -18,6 +18,10 @@ namespace Download.MigrationData.UserMigrations
 
         protected override void Seed(Download.Models.ApplicationDbContext context)
         {
+
+#if ETHANYA
+
+#endif
             //  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
