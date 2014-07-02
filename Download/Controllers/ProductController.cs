@@ -111,6 +111,8 @@ namespace Download.Controllers
         //Displays a product's readme, and links for downloading
         public ActionResult Display(int? id, int? VersionId, string searchString, int? page)
         {
+            //pass these values through the controllers and views so that when the 
+            //user returns to the search page, they return where they left off
             ViewData["page"] = page;
             ViewData["search"] = searchString;
 
