@@ -8,11 +8,6 @@ using Download.Models;
 using System.IO;
 using System.Diagnostics;
 using PagedList;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure;
-using System.Configuration;
 
 namespace Download.Controllers
 {
@@ -532,6 +527,7 @@ namespace Download.Controllers
 
 
                     //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
+                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex((LastProduct.ProductId + 1)).ToString("D8") + "\\" + GetVersionIndex(CurrVerId).ToString("D8") + "\\";
                     int i = 0;
 
                     foreach (string FileName in Request.Files)
@@ -566,8 +562,13 @@ namespace Download.Controllers
                                             Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                             ProductExFiles.FileName = fileName;
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
+                                            if (!Directory.Exists(filePath))
+                                            {
+                                                Directory.CreateDirectory(filePath);
+                                            }
                                             fileName = CurrExId + fileName;
-                                            Upload("extrafile",file);
+                                            var path = Path.Combine(filePath, fileName);
+                                            file.SaveAs(path);
                                             ProductExFiles.ExFileStatus = 1;
                                             ProductExFiles.Versions.Add(ProductVersion);
                                             ProductVersion.ExtraFiles.Add(ProductExFiles);
@@ -582,18 +583,28 @@ namespace Download.Controllers
                             {
                                 ProductArchive.Exe = fileName;
                                 ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
                                 fileName = CurrArchId + fileName;
-                                Upload("file",Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[FileName].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
                             }
                             else if (fileName.Contains("ReadMe"))
                             {
                                 ProductArchive.ReadMe = fileName;
                                 ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
                                 fileName = CurrArchId + fileName;
-                                Upload("file", Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[FileName].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
@@ -607,9 +618,14 @@ namespace Download.Controllers
                             {
                                 ProductArchive.Installer = fileName;
                                 ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                if (!Directory.Exists(filePath))
+                                {
+                                    Directory.CreateDirectory(filePath);
+                                }
                                 fileName = CurrArchId + fileName;
-                                Upload("file", Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
+                                var path = Path.Combine(filePath, fileName);
+                                Request.Files[FileName].SaveAs(path);
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
@@ -1348,55 +1364,6 @@ namespace Download.Controllers
                 return Vversions;
             }
 
-        }
-        public void Upload(string containerName, System.Web.HttpPostedFileBase file)
-        {
-            // Retrieve storage account from connection string.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
-
-            // Create the blob client.
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-
-            // Retrieve a reference to a container. 
-            CloudBlobContainer container = blobClient.GetContainerReference(containerName);
-
-            // Create the container if it doesn't already exist.
-            container.CreateIfNotExists();
-
-            // Retrieve reference to a blob named "myblob".
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(file.FileName);
-
-            // Create or overwrite the "myblob" blob with contents from a local file.
-            using (var fileStream = file.InputStream)
-            {
-                blockBlob.UploadFromStream(fileStream);
-            } 
-        }
-        public string GetBlobPath(string containerName, System.Web.HttpPostedFileBase file)
-        {
-            // Retrieve storage account from connection string.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
-
-            // Create the blob client.
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-
-            // Retrieve a reference to a container. 
-            CloudBlobContainer container = blobClient.GetContainerReference(containerName);
-
-            foreach (IListBlobItem item in container.ListBlobs(null, false))
-            {
-                if (item.GetType() == typeof(CloudBlobDirectory))
-                {
-                    CloudBlobDirectory directory = (CloudBlobDirectory)item;
-                    if (directory.Uri.ToString().Contains(file.FileName))
-                    {
-                        return directory.Uri.ToString();
-                    }
-                }
-            }
-            return null;
         }
     }
 
