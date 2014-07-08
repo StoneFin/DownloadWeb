@@ -13,6 +13,7 @@ using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure;
 using System.Configuration;
+using System.Web.Configuration;
 
 namespace Download.Controllers
 {
@@ -1353,7 +1354,7 @@ namespace Download.Controllers
         {
             // Retrieve storage account from connection string.
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+                System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
 
             // Create the blob client.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -1364,10 +1365,10 @@ namespace Download.Controllers
             // Create the container if it doesn't already exist.
             container.CreateIfNotExists();
 
-            // Retrieve reference to a blob named "myblob".
+            // Retrieve reference to a blob.
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(file.FileName);
 
-            // Create or overwrite the "myblob" blob with contents from a local file.
+            // Create or overwrite the blob with contents from a local file.
             using (var fileStream = file.InputStream)
             {
                 blockBlob.UploadFromStream(fileStream);
@@ -1377,7 +1378,7 @@ namespace Download.Controllers
         {
             // Retrieve storage account from connection string.
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+                System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
 
             // Create the blob client.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -1385,18 +1386,9 @@ namespace Download.Controllers
             // Retrieve a reference to a container. 
             CloudBlobContainer container = blobClient.GetContainerReference(containerName);
 
-            foreach (IListBlobItem item in container.ListBlobs(null, false))
-            {
-                if (item.GetType() == typeof(CloudBlobDirectory))
-                {
-                    CloudBlobDirectory directory = (CloudBlobDirectory)item;
-                    if (directory.Uri.ToString().Contains(file.FileName))
-                    {
-                        return directory.Uri.ToString();
-                    }
-                }
-            }
-            return null;
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(file.FileName);
+
+            return blockBlob.ToString();
         }
     }
 
