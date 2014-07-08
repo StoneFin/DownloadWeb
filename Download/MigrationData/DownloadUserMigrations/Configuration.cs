@@ -1,8 +1,5 @@
-namespace Download.MigrationData.UserMigrations
+namespace Download.MigrationData.DownloadUserMigrations
 {
-    using Download.Models;
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.EntityFramework;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
@@ -13,13 +10,11 @@ namespace Download.MigrationData.UserMigrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
-            MigrationsDirectory = @"MigrationData\UserMigrations";
+            MigrationsDirectory = @"MigrationData\DownloadUserMigrations";
         }
 
         protected override void Seed(Download.Models.ApplicationDbContext context)
         {
-
-
             //  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
@@ -32,18 +27,6 @@ namespace Download.MigrationData.UserMigrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
-            /*if (!context.Roles.Any(r => r.Name == "admin") || !context.Roles.Any(r => r.Name == "member") || !context.Roles.Any(r => r.Name == "non-validated member"))
-            {
-                var roleStore = new RoleStore<IdentityRole>(context);
-                var roleManager = new RoleManager<IdentityRole>(roleStore);
-
-                roleManager.Create(new IdentityRole { Name = "admin" });
-                roleManager.Create(new IdentityRole { Name = "member" });
-                roleManager.Create(new IdentityRole { Name = "non-validated member" });
-                context.SaveChanges();
-            }*/
-
-
         }
     }
 }
