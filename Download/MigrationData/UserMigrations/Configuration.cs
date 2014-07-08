@@ -19,9 +19,7 @@ namespace Download.MigrationData.UserMigrations
         protected override void Seed(Download.Models.ApplicationDbContext context)
         {
 
-#if ETHANYA
 
-#endif
             //  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
@@ -34,6 +32,17 @@ namespace Download.MigrationData.UserMigrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
+            /*if (!context.Roles.Any(r => r.Name == "admin") || !context.Roles.Any(r => r.Name == "member") || !context.Roles.Any(r => r.Name == "non-validated member"))
+            {
+                var roleStore = new RoleStore<IdentityRole>(context);
+                var roleManager = new RoleManager<IdentityRole>(roleStore);
+
+                roleManager.Create(new IdentityRole { Name = "admin" });
+                roleManager.Create(new IdentityRole { Name = "member" });
+                roleManager.Create(new IdentityRole { Name = "non-validated member" });
+                context.SaveChanges();
+            }*/
+
 
         }
     }
