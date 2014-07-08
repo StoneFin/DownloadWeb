@@ -584,21 +584,28 @@ namespace Download.Controllers
                                 ProductArchive.Exe = fileName;
                                 ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 fileName = CurrArchId + fileName;
+                                string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                Request.Files[FileName].SaveAs(path);
                                 Upload("file",Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
+                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
+                                System.IO.File.Delete(path);
                             }
                             else if (fileName.Contains("ReadMe"))
                             {
                                 ProductArchive.ReadMe = fileName;
                                 ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 fileName = CurrArchId + fileName;
-                                Upload("file", Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
                                 if (ProductVersion.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
+
                             }
                             else if (fileName.CompareTo("") == 0)
                             {
@@ -609,12 +616,15 @@ namespace Download.Controllers
                                 ProductArchive.Installer = fileName;
                                 ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
                                 fileName = CurrArchId + fileName;
-                                Upload("file", Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(GetBlobPath("file", Request.Files[FileName]));
                                 if (ProductVersion.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
                             }
 
                         }
@@ -1374,22 +1384,7 @@ namespace Download.Controllers
                 blockBlob.UploadFromStream(fileStream);
             } 
         }
-        public string GetBlobPath(string containerName, System.Web.HttpPostedFileBase file)
-        {
-            // Retrieve storage account from connection string.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
-
-            // Create the blob client.
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-
-            // Retrieve a reference to a container. 
-            CloudBlobContainer container = blobClient.GetContainerReference(containerName);
-
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(file.FileName);
-
-            return blockBlob.ToString();
-        }
+        
     }
 
 
