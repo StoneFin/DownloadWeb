@@ -30,9 +30,9 @@ namespace Download.Controllers
         {
 
 
- 
-                ViewData["search"] = searchString;
-            
+
+            ViewData["search"] = searchString;
+
             List<Product> products = new List<Product>();
             //display 10 results per page
             int pageSize = 10;
@@ -568,7 +568,7 @@ namespace Download.Controllers
                                             ProductExFiles.FileName = fileName;
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             fileName = CurrExId + fileName;
-                                            Upload("extrafile",file);
+                                            Upload("extrafile", file);
                                             ProductExFiles.ExFileStatus = 1;
                                             ProductExFiles.Versions.Add(ProductVersion);
                                             ProductVersion.ExtraFiles.Add(ProductExFiles);
@@ -586,7 +586,7 @@ namespace Download.Controllers
                                 fileName = CurrArchId + fileName;
                                 string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
                                 Request.Files[FileName].SaveAs(path);
-                                Upload("file",Request.Files[FileName]);
+                                Upload("file", Request.Files[FileName]);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
                                 System.IO.File.Delete(path);
@@ -1362,15 +1362,10 @@ namespace Download.Controllers
         }
         public void Upload(string containerName, System.Web.HttpPostedFileBase file)
         {
-#if DEBUG
+
             // Retrieve storage account from connection string.
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
                 System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
-#else
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-    ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
-#endif
-
 
             // Create the blob client.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -1388,9 +1383,9 @@ namespace Download.Controllers
             using (var fileStream = file.InputStream)
             {
                 blockBlob.UploadFromStream(fileStream);
-            } 
+            }
         }
-        
+
     }
 
 
