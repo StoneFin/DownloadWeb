@@ -1362,9 +1362,15 @@ namespace Download.Controllers
         }
         public void Upload(string containerName, System.Web.HttpPostedFileBase file)
         {
+#if DEBUG
             // Retrieve storage account from connection string.
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
                 System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
+#else
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+    ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+#endif
+
 
             // Create the blob client.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
