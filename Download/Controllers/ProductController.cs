@@ -517,7 +517,7 @@ namespace Download.Controllers
 
                 using (var db = new ProductDBContext())
                 {
-                    Product prod = new Product();
+                    Product prod = null;
                     prod.ProductName = product.ProductName;
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
