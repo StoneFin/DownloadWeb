@@ -19,7 +19,7 @@ namespace Download.Controllers
         public ActionResult Index(int? page)
         {
             //display 10 results per page
-            int pageSize = 10;
+            int pageSize = 20;
             //return the value of page from the view, if it's null return 1
             int pageNumber = (page ?? 1);
             //add paging to the user index 
