@@ -519,11 +519,13 @@ namespace Download.Controllers
                 {
                     Product prod = new Product();
                     prod.ProductName = product.ProductName;
+
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
                     var LastArchive = db.Archives.ToList().Last();
                     var LastVersion = db.Versions.ToList().Last();
                     CurrVerId = LastVersion.VersionId + 1;
+
                     //add one to the last archive id to get this archvie Id before it is put in the database
                     string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
                     prod.ProductStatus = 1;
