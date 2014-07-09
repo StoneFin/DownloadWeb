@@ -517,8 +517,7 @@ namespace Download.Controllers
 
                 using (var db = new ProductDBContext())
                 {
-
-
+                    //adding this comment so the changes can be redeployed
                     //grab the last product to anticipate where the new product will go before putting it in the database
                     var LastProduct = db.Products.ToList().Last();
                     var LastArchive = db.Archives.ToList().Last();
