@@ -1366,7 +1366,7 @@ namespace Download.Controllers
                 System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
 #else
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-    CloudConfigurationManager.GetSetting("StorageConnectionString"));
+                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
 #endif
             // Create the blob client.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
