@@ -189,7 +189,7 @@ namespace Download.Controllers
                                         //Get the readme
                                         var file = GetBlob("extrafile", arch.ReadMe);
                                         //Convert the byte[] to text so the markdown converter will work
-                                        var Read = System.Text.Encoding.Default.GetString(file);
+                                        var Read = System.Text.Encoding.UTF8.GetString(file);
                                         ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
@@ -225,7 +225,7 @@ namespace Download.Controllers
                                         //Get the readme
                                         var file = GetBlob("extrafile", arch.ReadMe);
                                         //Convert the byte[] to text so the markdown converter will work
-                                        var Read = System.Text.Encoding.Default.GetString(file);
+                                        var Read = System.Text.Encoding.UTF8.GetString(file);
                                         ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
@@ -1397,9 +1397,16 @@ namespace Download.Controllers
             // Retrieve reference to a blob.
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
 
-            byte[] byteArray = null;
-            blockBlob.DownloadToByteArray(byteArray, 0);
-            return byteArray;
+
+            string path = Path.Combine(Server.MapPath("~/App_Data"), fileName);
+            using (var fileStream = System.IO.File.OpenWrite(path))
+            {
+                blockBlob.DownloadToStream(fileStream);
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(path);
+            System.IO.File.Delete(path);
+            return fileBytes;
+ 
         }
 
     }
