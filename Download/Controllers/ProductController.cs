@@ -521,13 +521,10 @@ namespace Download.Controllers
 
                         //adding this comment so the changes can be redeployed
                         //grab the last product to anticipate where the new product will go before putting it in the database
-                        var LastProduct = db.Products.ToList().Last();
-                        var LastArchive = db.Archives.ToList().Last();
-                        var LastVersion = db.Versions.ToList().Last();
-                        CurrVerId = LastVersion.VersionId + 1;
+                        var LastProduct = db.Products.Last();
+
 
                         //add one to the last archive id to get this archvie Id before it is put in the database
-                        string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
                         Product prod = new Product();
                         prod.ProductName = product.ProductName;
                         prod.ProductStatus = 1;
@@ -554,12 +551,10 @@ namespace Download.Controllers
 
                                     if (i < 1)
                                     {
-                                        var LastExFile = db.ExtraFiles.ToList().Last();
                                         var uploadFiles = Request.Files.GetMultiple(FileName);
                                         foreach (var file in uploadFiles)
                                         {
-                                            //increment the LastFileId by one everytime a new ExtraFile is added
-                                            string CurrExId = (LastExFile.ExtraFileId + 1 + i).ToString() + "_";
+                                            //increment the LastFileId by one everytime a new ExtraFile is added;
                                             if (file.FileName.CompareTo("") == 0)
                                             {
                                                 //If this is true, then there is no file and nothing to be done
@@ -571,9 +566,9 @@ namespace Download.Controllers
                                                 Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                                 ProductExFiles.FileName = fileName;
                                                 ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
-                                                fileName = CurrExId + fileName;
                                                 Upload("extrafile", file);
                                                 ProductExFiles.ExFileStatus = 1;
+                                                Upload("extrafile", file);
                                                 ProductExFiles.Versions.Add(ProductVersion);
                                                 ProductVersion.ExtraFiles.Add(ProductExFiles);
                                                 i++;
@@ -587,7 +582,6 @@ namespace Download.Controllers
                                 {
                                     ProductArchive.Exe = fileName;
                                     ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                    fileName = CurrArchId + fileName;
                                     string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
                                     Request.Files[FileName].SaveAs(path);
                                     Upload("file", Request.Files[FileName]);
@@ -599,7 +593,6 @@ namespace Download.Controllers
                                 {
                                     ProductArchive.ReadMe = fileName;
                                     ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                    fileName = CurrArchId + fileName;
                                     if (ProductVersion.VersionName == null)
                                     {
                                         string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
@@ -619,7 +612,6 @@ namespace Download.Controllers
                                 {
                                     ProductArchive.Installer = fileName;
                                     ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                    fileName = CurrArchId + fileName;
                                     if (ProductVersion.VersionName == null)
                                     {
                                         string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
