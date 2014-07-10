@@ -668,6 +668,8 @@ namespace Download.Controllers
             catch (Exception ex)
             {
                 string error = ex.ToString();
+                ViewBag.Message = error;
+             
             }
 
 
