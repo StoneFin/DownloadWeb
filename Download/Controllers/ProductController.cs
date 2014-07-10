@@ -190,7 +190,7 @@ namespace Download.Controllers
                                         var file = GetBlob("file", arch.ReadMe);
                                         //Convert the byte[] to text so the markdown converter will work
                                         var Read = System.Text.Encoding.Unicode.GetString(file);
-                                        Debug.Write(Read);
+                                        System.Diagnostics.Debug.WriteLine(Read);
                                         ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
@@ -227,7 +227,7 @@ namespace Download.Controllers
                                         var file = GetBlob("file", arch.ReadMe);
                                         //Convert the byte[] to text so the markdown converter will work
                                         var Read = System.Text.Encoding.Unicode.GetString(file);
-                                        Debug.Write(Read);
+                                        System.Diagnostics.Debug.WriteLine(Read);
                                         ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
