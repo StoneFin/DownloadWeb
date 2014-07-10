@@ -45,8 +45,6 @@ namespace Download.Controllers
             //open database connection
             using (var db = new ProductDBContext())
             {
-                int skip = (int)(pageNumber - 1) * 10;
-                int take = (int)pageNumber * 10;
 
                 //blank search, return all products
                 if (searchString == "" || searchString == null)
@@ -169,7 +167,6 @@ namespace Download.Controllers
                 md.SafeMode = true;
                 md.ExtraMode = true;
                 //If another version was selected from the display view, display that particular version
-                string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(product.ProductId).ToString("D8") + "\\";
                 if (ProductModel.Versions.Count > 0)
                 {
                     if (VersionId != null)
@@ -187,11 +184,13 @@ namespace Download.Controllers
 
                                     //grab the root path from web.config and append the specific extension to it
                                     ArchiveIndex = arch.ArchiveId;
-                                    string fileName = filePath + GetVersionIndex(version.VersionId).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
                                     try
                                     {
-                                        var file = System.IO.File.ReadAllText(fileName);
-                                        ViewData["Content"] = md.Transform(file);
+                                        //Get the readme
+                                        var file = GetBlob("extrafile", arch.ReadMe);
+                                        //Convert the byte[] to text so the markdown converter will work
+                                        var Read = System.Text.Encoding.Default.GetString(file);
+                                        ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
                                     {
@@ -221,12 +220,13 @@ namespace Download.Controllers
                                 {
                                     //grab the index of the archive to find it in the server
                                     ArchiveIndex = arch.ArchiveId;
-                                    string fileName = filePath + GetVersionIndex(version.VersionId).ToString("D8") + "\\" + arch.ArchiveId.ToString() + "_" + arch.ReadMe.ToString();
                                     try
                                     {
-                                        var file = System.IO.File.ReadAllText(fileName);
-                                        //convert the markdown readme into Html
-                                        ViewData["Content"] = md.Transform(file);
+                                        //Get the readme
+                                        var file = GetBlob("extrafile", arch.ReadMe);
+                                        //Convert the byte[] to text so the markdown converter will work
+                                        var Read = System.Text.Encoding.Default.GetString(file);
+                                        ViewData["Content"] = md.Transform(Read);
                                     }
                                     catch (Exception ex)
                                     {
@@ -1261,12 +1261,8 @@ namespace Download.Controllers
             {
                 try
                 {
-                    //append the archive id to the front of the fileName so the file can be found
-                    fileName = archId.ToString() + "_" + fileName;
-                    //add the appropriate extensions on to the root path
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(id).ToString("D8") + "\\" + GetVersionIndex(verId).ToString("D8") + "\\";
-                    string FullFilePath = filePath + fileName;
-                    byte[] fileBytes = System.IO.File.ReadAllBytes(FullFilePath);
+
+                    byte[] fileBytes = GetBlob("file", fileName);
                     return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
                 catch (Exception ex)
@@ -1281,12 +1277,7 @@ namespace Download.Controllers
             {
                 try
                 {
-                    //append the archive id to the front of the fileName so the file can be found
-                    fileName = fileId.ToString() + "_" + fileName;
-                    //add the appropriate extensions on to the root path
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(id).ToString("D8") + "\\" + GetVersionIndex(verId).ToString("D8") + "\\";
-                    string FullFilePath = filePath + fileName;
-                    byte[] fileBytes = System.IO.File.ReadAllBytes(FullFilePath);
+                    byte[] fileBytes = GetBlob("extrafile", fileName);
                     return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
                 catch (Exception ex)
@@ -1385,6 +1376,30 @@ namespace Download.Controllers
             {
                 blockBlob.UploadFromStream(fileStream);
             }
+        }
+        public byte[] GetBlob(string containerName, string fileName)
+        {
+#if DEBUG
+            // Retrieve storage account from connection string.
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                System.Configuration.ConfigurationManager.AppSettings["StorageConnectionString"]);
+#else
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+#endif
+
+            // Create the blob client.
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+
+            // Retrieve reference to a previously created container.
+            CloudBlobContainer container = blobClient.GetContainerReference(containerName);
+
+            // Retrieve reference to a blob.
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
+
+            byte[] byteArray = null;
+            blockBlob.DownloadToByteArray(byteArray, 0);
+            return byteArray;
         }
 
     }
