@@ -508,158 +508,166 @@ namespace Download.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ProductId,ProductName,ProductStatus")] ProductCreateView product, string VStatus, string searchString, int? page)
         {
-
-            //refer to the comments of AddVersion to see how most of this works
-            if (ModelState.IsValid)
+            try
             {
-                int CurrVerId = 0;
-                bool ExFileFlag = false;
-
-                using (var db = new ProductDBContext())
+                //refer to the comments of AddVersion to see how most of this works
+                if (ModelState.IsValid)
                 {
-                    //adding this comment so the changes can be redeployed
-                    //grab the last product to anticipate where the new product will go before putting it in the database
-                    var LastProduct = db.Products.ToList().Last();
-                    var LastArchive = db.Archives.ToList().Last();
-                    var LastVersion = db.Versions.ToList().Last();
-                    CurrVerId = LastVersion.VersionId + 1;
+                    int CurrVerId = 0;
+                    bool ExFileFlag = false;
 
-                    //add one to the last archive id to get this archvie Id before it is put in the database
-                    string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
-                    Product prod = new Product();
-                    prod.ProductName = product.ProductName;
-                    prod.ProductStatus = 1;
-                    Models.Archive ProductArchive = new Models.Archive();
-                    Models.Version ProductVersion = new Models.Version();
-
-
-                    //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
-                    int i = 0;
-
-                    foreach (string FileName in Request.Files)
+                    using (var db = new ProductDBContext())
                     {
-                        var fileName = Request.Files[FileName].FileName;
-                        try
-                        {
-                            //Due to the way the multiple file upload works, there are multiple FileNames with 'FileUpload4'. However, each 'FileUpload4' contains all
-                            //of the multiple selected files, and the result of iterating over them without breaking after one pass would be uploading the 
-                            //number of files selected squared.
-                            if (FileName == "FileUpload4")
-                            {
-                                //Nest the check inside the 'FileUpload4' check so that the else at the end if the first if statement doesn't 
-                                //get executed
 
-                                if (i < 1)
+                        //adding this comment so the changes can be redeployed
+                        //grab the last product to anticipate where the new product will go before putting it in the database
+                        var LastProduct = db.Products.ToList().Last();
+                        var LastArchive = db.Archives.ToList().Last();
+                        var LastVersion = db.Versions.ToList().Last();
+                        CurrVerId = LastVersion.VersionId + 1;
+
+                        //add one to the last archive id to get this archvie Id before it is put in the database
+                        string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
+                        Product prod = new Product();
+                        prod.ProductName = product.ProductName;
+                        prod.ProductStatus = 1;
+                        Models.Archive ProductArchive = new Models.Archive();
+                        Models.Version ProductVersion = new Models.Version();
+
+
+
+                        //add one to the get index because 1+LastProduct.ProductId = the new created product's Id
+                        int i = 0;
+
+                        foreach (string FileName in Request.Files)
+                        {
+                            var fileName = Request.Files[FileName].FileName;
+                            try
+                            {
+                                //Due to the way the multiple file upload works, there are multiple FileNames with 'FileUpload4'. However, each 'FileUpload4' contains all
+                                //of the multiple selected files, and the result of iterating over them without breaking after one pass would be uploading the 
+                                //number of files selected squared.
+                                if (FileName == "FileUpload4")
                                 {
-                                    var LastExFile = db.ExtraFiles.ToList().Last();
-                                    var uploadFiles = Request.Files.GetMultiple(FileName);
-                                    foreach (var file in uploadFiles)
+                                    //Nest the check inside the 'FileUpload4' check so that the else at the end if the first if statement doesn't 
+                                    //get executed
+
+                                    if (i < 1)
                                     {
-                                        //increment the LastFileId by one everytime a new ExtraFile is added
-                                        string CurrExId = (LastExFile.ExtraFileId + 1 + i).ToString() + "_";
-                                        if (file.FileName.CompareTo("") == 0)
+                                        var LastExFile = db.ExtraFiles.ToList().Last();
+                                        var uploadFiles = Request.Files.GetMultiple(FileName);
+                                        foreach (var file in uploadFiles)
                                         {
-                                            //If this is true, then there is no file and nothing to be done
+                                            //increment the LastFileId by one everytime a new ExtraFile is added
+                                            string CurrExId = (LastExFile.ExtraFileId + 1 + i).ToString() + "_";
+                                            if (file.FileName.CompareTo("") == 0)
+                                            {
+                                                //If this is true, then there is no file and nothing to be done
+                                            }
+                                            else
+                                            {
+                                                ExFileFlag = true;
+                                                fileName = file.FileName;
+                                                Models.ExtraFile ProductExFiles = new Models.ExtraFile();
+                                                ProductExFiles.FileName = fileName;
+                                                ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
+                                                fileName = CurrExId + fileName;
+                                                Upload("extrafile", file);
+                                                ProductExFiles.ExFileStatus = 1;
+                                                ProductExFiles.Versions.Add(ProductVersion);
+                                                ProductVersion.ExtraFiles.Add(ProductExFiles);
+                                                i++;
+                                            }
                                         }
-                                        else
-                                        {
-                                            ExFileFlag = true;
-                                            fileName = file.FileName;
-                                            Models.ExtraFile ProductExFiles = new Models.ExtraFile();
-                                            ProductExFiles.FileName = fileName;
-                                            ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
-                                            fileName = CurrExId + fileName;
-                                            Upload("extrafile", file);
-                                            ProductExFiles.ExFileStatus = 1;
-                                            ProductExFiles.Versions.Add(ProductVersion);
-                                            ProductVersion.ExtraFiles.Add(ProductExFiles);
-                                            i++;
-                                        }
+
+
                                     }
-
-
                                 }
-                            }
-                            else if (fileName.Contains(".exe"))
-                            {
-                                ProductArchive.Exe = fileName;
-                                ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                fileName = CurrArchId + fileName;
-                                string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
-                                Request.Files[FileName].SaveAs(path);
-                                Upload("file", Request.Files[FileName]);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                ProductVersion.VersionName = versionInfo.ProductVersion;
-                                System.IO.File.Delete(path);
-                            }
-                            else if (fileName.Contains("ReadMe"))
-                            {
-                                ProductArchive.ReadMe = fileName;
-                                ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                fileName = CurrArchId + fileName;
-                                if (ProductVersion.VersionName == null)
+                                else if (fileName.Contains(".exe"))
                                 {
+                                    ProductArchive.Exe = fileName;
+                                    ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                    fileName = CurrArchId + fileName;
                                     string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
                                     Request.Files[FileName].SaveAs(path);
+                                    Upload("file", Request.Files[FileName]);
                                     var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
                                     System.IO.File.Delete(path);
                                 }
-                                Upload("file", Request.Files[FileName]);
-
-                            }
-                            else if (fileName.CompareTo("") == 0)
-                            {
-                                //if the fileName is blank, then no file was selected and do nothing
-                            }
-                            else
-                            {
-                                ProductArchive.Installer = fileName;
-                                ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                fileName = CurrArchId + fileName;
-                                if (ProductVersion.VersionName == null)
+                                else if (fileName.Contains("ReadMe"))
                                 {
-                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
-                                    Request.Files[FileName].SaveAs(path);
-                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
-                                    ProductVersion.VersionName = versionInfo.ProductVersion;
-                                    System.IO.File.Delete(path);
+                                    ProductArchive.ReadMe = fileName;
+                                    ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                    fileName = CurrArchId + fileName;
+                                    if (ProductVersion.VersionName == null)
+                                    {
+                                        string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                        Request.Files[FileName].SaveAs(path);
+                                        var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                        ProductVersion.VersionName = versionInfo.ProductVersion;
+                                        System.IO.File.Delete(path);
+                                    }
+                                    Upload("file", Request.Files[FileName]);
+
                                 }
-                                Upload("file", Request.Files[FileName]);
+                                else if (fileName.CompareTo("") == 0)
+                                {
+                                    //if the fileName is blank, then no file was selected and do nothing
+                                }
+                                else
+                                {
+                                    ProductArchive.Installer = fileName;
+                                    ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
+                                    fileName = CurrArchId + fileName;
+                                    if (ProductVersion.VersionName == null)
+                                    {
+                                        string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                        Request.Files[FileName].SaveAs(path);
+                                        var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                                        ProductVersion.VersionName = versionInfo.ProductVersion;
+                                        System.IO.File.Delete(path);
+                                    }
+                                    Upload("file", Request.Files[FileName]);
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                ViewBag.Message = "No files chosen";
+                            }
+
+
+                            if (ProductVersion.VersionName == null)
+                            {
+                                ProductVersion.VersionName = "No Info";
                             }
 
                         }
-                        catch (Exception ex)
-                        {
-                            ViewBag.Message = "No files chosen";
-                        }
 
+                        ProductArchive.DateUploaded = DateTime.Now;
+                        ProductVersion.Archives.Add(ProductArchive);
+                        ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
+                        ProductVersion.DateCreated = DateTime.Now;
+                        prod.Versions.Add(ProductVersion);
+                        db.Products.Add(prod);
+                        db.SaveChanges();
 
-                        if (ProductVersion.VersionName == null)
-                        {
-                            ProductVersion.VersionName = "No Info";
-                        }
 
                     }
-
-                    ProductArchive.DateUploaded = DateTime.Now;
-                    ProductVersion.Archives.Add(ProductArchive);
-                    ProductVersion.VersionStatus = Convert.ToInt32(VStatus);
-                    ProductVersion.DateCreated = DateTime.Now;
-                    prod.Versions.Add(ProductVersion);
-                    db.Products.Add(prod);
-                    db.SaveChanges();
-
-
+                    if (ExFileFlag == true && CurrVerId != 0)
+                    {
+                        return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page, IsEdit = false });
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", new { searchString = searchString, page = page });
+                    }
                 }
-                if (ExFileFlag == true && CurrVerId != 0)
-                {
-                    return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page, IsEdit = false });
-                }
-                else
-                {
-                    return RedirectToAction("Index", new { searchString = searchString, page = page });
-                }
+            }
+            catch (Exception ex)
+            {
+
             }
 
 
