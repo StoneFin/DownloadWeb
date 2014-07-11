@@ -58,7 +58,7 @@
 
                 @if (User.IsInRole("admin") == true)
                 {
-                    <td class="col-md-1 row">
+                    <td class="col-md-1 col-lg-1 row">
                         @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" }) |
                         @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" })
                     </td>
