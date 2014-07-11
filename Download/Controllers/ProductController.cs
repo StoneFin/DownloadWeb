@@ -323,16 +323,11 @@ namespace Download.Controllers
                 using (var db = new ProductDBContext())
                 {
                     //find the last archive's id number to anticipate the added archive's id before it is added to the database
-                    var LastArchive = db.Archives.ToList().Last();
-                    var LastVersion = db.Versions.ToList().Last();
                     //add one to the last archive id to get this archvie Id before it is put in the database
                     //This string appends the archive Id in front of the name to allow for easy access in the directories
-                    string CurrArchId = (LastArchive.ArchiveId + 1).ToString() + "_";
-                    int VerIndex = LastVersion.VersionId + 1;
 
                     prod = db.Products.Find(version.ProductId);
                     //Add the files and extract the version from the file, with the version extracted from the .exe given the highest priority
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(prod.ProductId).ToString("D8") + "\\" + GetVersionIndex(VerIndex).ToString("D8") + "\\";
                     int i = 0;
                     //If a prevVersion was selected from the dropdown list 
                     //grab the extra files and add them to the new version
@@ -360,8 +355,6 @@ namespace Download.Controllers
 
                                 if (i < 1)
                                 {
-                                    var LastExFile = db.ExtraFiles.ToList().Last();
-                                    string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
                                     var uploadFiles = Request.Files.GetMultiple(FileName);
                                     foreach (var file in uploadFiles)
                                     {
@@ -377,13 +370,7 @@ namespace Download.Controllers
                                             ProductExFiles.FileName = fileName;
                                             //convert the content length to bytes, and allow 3 decimal places of accuracy
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
-                                            if (!Directory.Exists(filePath))
-                                            {
-                                                Directory.CreateDirectory(filePath);
-                                            }
-                                            fileName = CurrExId + fileName;
-                                            var path = Path.Combine(filePath, fileName);
-                                            file.SaveAs(path);
+                                            Upload("extrafile", file);
                                             ProductExFiles.ExFileStatus = 1;
                                             ProductExFiles.Versions.Add(ProductVersion);
                                             ProductVersion.ExtraFiles.Add(ProductExFiles);
@@ -398,32 +385,27 @@ namespace Download.Controllers
                             {
                                 ProductArchive.Exe = fileName;
                                 ProductArchive.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
+                                string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
                                 Request.Files[FileName].SaveAs(path);
+                                Upload("file", Request.Files[FileName]);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 ProductVersion.VersionName = versionInfo.ProductVersion;
+                                System.IO.File.Delete(path);
                             }
                             else if (fileName.Contains("ReadMe"))
                             {
                                 ProductArchive.ReadMe = fileName;
                                 ProductArchive.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
-                                Request.Files[FileName].SaveAs(path);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
+
                             }
                             else if (fileName.CompareTo("") == 0)
                             {
@@ -433,18 +415,15 @@ namespace Download.Controllers
                             {
                                 ProductArchive.Installer = fileName;
                                 ProductArchive.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
-                                Request.Files[FileName].SaveAs(path);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (ProductVersion.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     ProductVersion.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
                             }
 
                         }
@@ -563,7 +542,6 @@ namespace Download.Controllers
                                                 ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                                 Upload("extrafile", file);
                                                 ProductExFiles.ExFileStatus = 1;
-                                                Upload("extrafile", file);
                                                 ProductExFiles.Versions.Add(ProductVersion);
                                                 ProductVersion.ExtraFiles.Add(ProductExFiles);
                                                 i++;
@@ -877,17 +855,12 @@ namespace Download.Controllers
                     }
                     ExFile = ExFile.Where(x => x.ExFileStatus > 0).ToList();
 
-                    string CurrArchId = ArchIndex.ToString() + "_";
-                    //Add the files to the appropriate folder based on the name, such as '.exe', or 'ReadMe'
-                    string filePath = System.Configuration.ConfigurationManager.AppSettings["Path"].ToString() + GetProductIndex(vers.ProductId).ToString("D8") + "\\" + GetVersionIndex(version.VersionId).ToString("D8") + "\\";
                     //Keeps track of the number of Extra Files added
                     int i = 0;
                     //Keeps track of the index of the Exfiles to correspond with the files in 'UploadFile4'
                     int j = 0;
                     //Makes sure that the 'fileUpload4' only saves once
                     int k = 0;
-                    //Keeps track of the number of files added in the edit so the ExFileId can be properly anticipated
-                    int l = 0;
 
                     foreach (string FileName in Request.Files)
                     {
@@ -909,24 +882,14 @@ namespace Download.Controllers
                                     var uploadFiles = Request.Files.GetMultiple(FileName);
                                     foreach (var file in uploadFiles)
                                     {
-                                        var LastExFile = db.ExtraFiles.ToList().Last();
-                                        string CurrExId = (LastExFile.ExtraFileId + 1 + l).ToString() + "_";
-                                        fileName = file.FileName;
                                         Models.ExtraFile ProductExFiles = new Models.ExtraFile();
                                         ProductExFiles.FileName = fileName;
                                         ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
-                                        if (!Directory.Exists(filePath))
-                                        {
-                                            Directory.CreateDirectory(filePath);
-                                        }
-                                        fileName = CurrExId + fileName;
-                                        var path = Path.Combine(filePath, fileName);
-                                        file.SaveAs(path);
+                                        Upload("extrafile", file);
                                         ProductExFiles.ExFileStatus = 1;
                                         ProductExFiles.Versions.Add(vers);
                                         vers.ExtraFiles.Add(ProductExFiles);
                                         i++;
-                                        l++;
                                     }
 
 
@@ -947,24 +910,15 @@ namespace Download.Controllers
                                         else
                                         {
                                             fileName = file.FileName;
-                                            var LastExFile = db.ExtraFiles.ToList().Last();
-                                            string CurrExId = (LastExFile.ExtraFileId + 1).ToString() + "_";
                                             ExtraFile ProductExFiles = new ExtraFile();
                                             ProductExFiles.FileName = fileName;
                                             ProductExFiles.FileSize = ((double)file.ContentLength / 1024).ToString("F3");
                                             ProductExFiles.FileDescription = Description[j];
                                             ProductExFiles.ExFileStatus = 1;
-                                            if (!Directory.Exists(filePath))
-                                            {
-                                                Directory.CreateDirectory(filePath);
-                                            }
-                                            fileName = CurrExId + fileName;
-                                            var path = Path.Combine(filePath, fileName);
-                                            file.SaveAs(path);
+                                            Upload("extrafile", file);
                                             ExFile[j].ExFileStatus = 0;
                                             ProductExFiles.Versions.Add(vers);
                                             vers.ExtraFiles.Add(ProductExFiles);
-                                            l++;
                                             j++;
                                         }
                                     }
@@ -976,32 +930,26 @@ namespace Download.Controllers
                             {
                                 arch.Exe = fileName;
                                 arch.ExeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
+                                string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
                                 Request.Files[FileName].SaveAs(path);
+                                Upload("file", Request.Files[FileName]);
                                 var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 vers.VersionName = versionInfo.ProductVersion;
+                                System.IO.File.Delete(path);
                             }
                             else if (fileName.Contains("ReadMe"))
                             {
                                 arch.ReadMe = fileName;
                                 arch.ReadMeSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
-                                Request.Files[FileName].SaveAs(path);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (vers.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     vers.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
                             }
                             else if (fileName.CompareTo("") == 0)
                             {
@@ -1011,18 +959,15 @@ namespace Download.Controllers
                             {
                                 arch.Installer = fileName;
                                 arch.InstallerSize = ((double)Request.Files[FileName].ContentLength / 1024).ToString("F3");
-                                if (!Directory.Exists(filePath))
-                                {
-                                    Directory.CreateDirectory(filePath);
-                                }
-                                fileName = CurrArchId + fileName;
-                                var path = Path.Combine(filePath, fileName);
-                                Request.Files[FileName].SaveAs(path);
-                                var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                 if (vers.VersionName == null)
                                 {
+                                    string path = Path.Combine(Server.MapPath("~/App_Data"), Request.Files[FileName].FileName);
+                                    Request.Files[FileName].SaveAs(path);
+                                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
                                     vers.VersionName = versionInfo.ProductVersion;
+                                    System.IO.File.Delete(path);
                                 }
+                                Upload("file", Request.Files[FileName]);
                             }
 
                         }
