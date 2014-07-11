@@ -45,7 +45,7 @@
 
         @foreach (var item in Model)
         {
-            <tr style="background-color: rgba(255, 255, 255, 0.50); border: 2px;">
+            <tr style="background-color: rgba(255, 255, 255, 0.50);">
                 <td style="font-size: larger;" class="col-md-4">
                     @item.ProductName
                 </td>
@@ -58,7 +58,7 @@
 
                 @if (User.IsInRole("admin") == true)
                 {
-                    <td class="col-md-1 row">
+                    <td class="col-md-2 row">
                         @Html.ActionLink("Edit", "Edit", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" }) |
                         @Html.ActionLink("Remove", "Remove", new { id = item.ProductId, searchString = search, page = pageNum }, new { @style = "color: inherit;" })
                     </td>
