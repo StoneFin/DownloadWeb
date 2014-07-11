@@ -617,10 +617,12 @@ namespace Download.Controllers
                         prod.Versions.Add(ProductVersion);
                         db.Products.Add(prod);
                         db.SaveChanges();
-
+                        //Grab the Id of the version we just added 
+                        CurrVerId = db.Versions.Last().VersionId;
+                        
 
                     }
-                    if (ExFileFlag == true)
+                    if (ExFileFlag == true && CurrVerId != 0)
                     {
                         return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page, IsEdit = false });
                     }
