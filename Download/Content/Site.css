@@ -90,3 +90,9 @@ input[type="checkbox"].input-validation-error {
   background-color: #ffffff;
   border-color: #434d89;
 }
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #434d89;
+}
