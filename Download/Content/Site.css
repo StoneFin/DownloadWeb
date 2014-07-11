@@ -42,7 +42,15 @@ input[type="checkbox"].input-validation-error {
 }
 .container{
 }
-
+.btn-block {
+  display: block;
+  width: 100%;
+  padding-right: 0;
+  padding-left: 0;
+  background-color:#434d89;
+  border-color: #ffffff;
+  color: #ffffff;
+}
 .btn-block:hover {
     background-color: #ffffff;
     color: #434d89;
@@ -66,4 +74,19 @@ input[type="checkbox"].input-validation-error {
   background-color: #434d89;
   color: #ffffff;
 
+}
+.btn-primary {
+  color: #ffffff;
+  background-color: #434d89;
+  border-color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.open .dropdown-toggle.btn-primary {
+  color: #434d89;
+  background-color: #ffffff;
+  border-color: #434d89;
 }
