@@ -618,7 +618,8 @@ namespace Download.Controllers
                         db.Products.Add(prod);
                         db.SaveChanges();
                         //Grab the Id of the version we just added 
-                        CurrVerId = db.Versions.Last().VersionId;
+                        var CurVer = db.Versions.Last();
+                        CurrVerId = CurVer.VersionId;
                         
 
                     }
