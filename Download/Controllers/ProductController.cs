@@ -620,7 +620,7 @@ namespace Download.Controllers
 
 
                     }
-                    if (ExFileFlag == true && CurrVerId != 0)
+                    if (ExFileFlag == true)
                     {
                         return RedirectToAction("Description", new { id = CurrVerId, searchString = searchString, page = page, IsEdit = false });
                     }
